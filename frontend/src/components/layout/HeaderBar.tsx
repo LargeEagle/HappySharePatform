@@ -40,19 +40,13 @@ export function HeaderBar({
         title={title}
         titleStyle={{ color: theme.colors.onSurface }}
       />
-      <View style={styles.rightContainer}>
-        {showThemeToggle && (
-          <View style={styles.themeToggle}>
-            <ThemeToggle />
-          </View>
-        )}
-        {rightAction && (
-          <Appbar.Action 
-            icon={rightAction.icon} 
-            onPress={rightAction.onPress}
-          />
-        )}
-      </View>
+      {showThemeToggle && <ThemeToggle />}
+      {rightAction && (
+        <Appbar.Action 
+          icon={rightAction.icon} 
+          onPress={rightAction.onPress}
+        />
+      )}
     </Appbar.Header>
   );
 }
@@ -60,12 +54,5 @@ export function HeaderBar({
 const styles = StyleSheet.create({
   header: {
     elevation: 4,
-  },
-  rightContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  themeToggle: {
-    marginRight: 8,
   },
 });

@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaLayout } from '../components/layout';
-import { Button, TextInput, Card, TestLogin } from '../components/common';
+import { Button, TextInput, Card, TestLogin, ThemeToggle } from '../components/common';
 import { useAuth } from '../hooks/useAuth';
 import { useDocumentationCheck } from '../hooks/useDocumentationCheck';
 import { useTheme } from '../providers/ThemeProvider';
@@ -63,6 +63,9 @@ export function LoginScreen({ navigation }: Props) {
   return (
     <SafeAreaLayout>
       <View style={styles.container}>
+        <View style={styles.themeToggleContainer}>
+          <ThemeToggle showLabel={true} />
+        </View>
         {__DEV__ && <TestLogin navigation={navigation} />}
         <Card style={styles.card}>
           <Text variant="headlineMedium" style={styles.title}>
@@ -111,6 +114,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     justifyContent: 'center',
+  },
+  themeToggleContainer: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 10,
   },
   card: {
     padding: 16,
