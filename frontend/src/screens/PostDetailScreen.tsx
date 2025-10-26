@@ -1,20 +1,79 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Text, Avatar, Chip, IconButton, Surface, Portal, Modal } from 'react-native-paper';
+import { StyleSheet, View, Alert } from 'react-native';
+import { ActivityIndicator, Text, Avatar, Chip, IconButton, Surface, Portal, Modal, Menu, Button } from 'react-native-paper';
 import { SafeAreaLayout } from '../components/layout';
 import { useAppTheme } from '../providers/ThemeProvider';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { usePost } from '../hooks/usePost';
 import { usePostInteraction } from '../hooks/usePostInteraction';
+import { usePostManagement } from '../hooks/usePostManagement';
 import { CommentsList } from '../components/common/CommentsList';
+import { updateDevDocs } from '../utils/devDocs';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'PostDetail'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'PostDetails'>;
 
-function PostDetailScreen({ route }: Props) {
+function PostDetailScreen({ route, navigation }: Props) {
   const { theme } = useAppTheme();
   const { postId } = route.params;
   const { post, isLoading, error } = usePost(postId);
+  const { deletePost, togglePublish, isLoading: isManaging } = usePostManagement();
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  const handleEdit = () => {
+    setMenuVisible(false);
+    navigation.navigate('EditPost', { postId });
+  };
+
+  const handleDelete = () => {
+    setMenuVisible(false);
+    Alert.alert(
+      '刪除文章',
+      '確定要刪除這篇文章嗎？此操作無法復原。',
+      [
+        { text: '取消', style: 'cancel' },
+        {
+          text: '刪除',
+          style: 'destructive',
+          onPress: async () => {
+            const success = await deletePost(postId);
+            if (success) {
+              updateDevDocs({
+                type: 'feature',
+                title: '文章刪除功能使用',
+                details: [
+                  `文章 "${post?.title}" 已成功刪除`,
+                  '文章已從列表中移除',
+                  '返回首頁'
+                ]
+              });
+              Alert.alert('成功', '文章已刪除', [
+                { text: '確定', onPress: () => navigation.goBack() }
+              ]);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleTogglePublish = async () => {
+    setMenuVisible(false);
+    const result = await togglePublish(postId);
+    if (result) {
+      const action = result.isPublished ? '已發布' : '已取消發布';
+      updateDevDocs({
+        type: 'feature',
+        title: '文章發布狀態切換',
+        details: [
+          `文章 "${post?.title}" ${action}`,
+          `發布狀態: ${result.isPublished ? '公開' : '私密'}`,
+          '狀態已更新'
+        ]
+      });
+      Alert.alert('成功', `文章${action}`);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -61,23 +120,55 @@ function PostDetailScreen({ route }: Props) {
     <SafeAreaLayout>
       <Surface style={styles.container}>
         <View style={styles.header}>
-          <View style={styles.authorInfo}>
-            {post.author.avatar ? (
-              <Avatar.Image size={48} source={{ uri: post.author.avatar }} />
-            ) : (
-              <Avatar.Text 
-                size={48} 
-                label={post.author.username[0].toUpperCase()}
-                color={theme.colors.onPrimary}
-                style={{ backgroundColor: theme.colors.primary }}
-              />
-            )}
-            <View style={styles.authorText}>
-              <Text variant="titleMedium">{post.author.username}</Text>
-              <Text variant="bodySmall" style={{ color: theme.colors.secondary }}>
-                {new Date(post.createdAt).toLocaleDateString()}
-              </Text>
+          <View style={styles.headerRow}>
+            <View style={styles.authorInfo}>
+              {post.author.avatar ? (
+                <Avatar.Image size={48} source={{ uri: post.author.avatar }} />
+              ) : (
+                <Avatar.Text 
+                  size={48} 
+                  label={post.author.username[0].toUpperCase()}
+                  color={theme.colors.onPrimary}
+                  style={{ backgroundColor: theme.colors.primary }}
+                />
+              )}
+              <View style={styles.authorText}>
+                <Text variant="titleMedium">{post.author.username}</Text>
+                <Text variant="bodySmall" style={{ color: theme.colors.secondary }}>
+                  {new Date(post.createdAt).toLocaleDateString()}
+                </Text>
+              </View>
             </View>
+            
+            <Menu
+              visible={menuVisible}
+              onDismiss={() => setMenuVisible(false)}
+              anchor={
+                <IconButton
+                  icon="dots-vertical"
+                  onPress={() => setMenuVisible(true)}
+                />
+              }
+            >
+              <Menu.Item
+                onPress={handleEdit}
+                title="編輯文章"
+                leadingIcon="pencil"
+                disabled={isManaging}
+              />
+              <Menu.Item
+                onPress={handleTogglePublish}
+                title={post.isPublished ? "取消發布" : "發布文章"}
+                leadingIcon={post.isPublished ? "eye-off" : "eye"}
+                disabled={isManaging}
+              />
+              <Menu.Item
+                onPress={handleDelete}
+                title="刪除文章"
+                leadingIcon="delete"
+                disabled={isManaging}
+              />
+            </Menu>
           </View>
           
           {post.tags && post.tags.length > 0 && (
@@ -177,10 +268,16 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
   authorInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    flex: 1,
   },
   authorText: {
     marginLeft: 12,

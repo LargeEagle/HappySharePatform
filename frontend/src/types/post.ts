@@ -1,7 +1,7 @@
 export interface Author {
   id: string;
   username: string;
-  avatar?: string;
+  avatar?: string | null;
 }
 
 export interface Post {
@@ -17,6 +17,7 @@ export interface Post {
   tags?: string[];
   isLiked?: boolean;
   isBookmarked?: boolean;
+  isPublished?: boolean;
 }
 
 export interface PostsResponse {

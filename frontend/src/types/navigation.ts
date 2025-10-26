@@ -5,4 +5,5 @@ export type RootStackParamList = {
   Profile: undefined;
   CreatePost: undefined;
   PostDetails: { postId: string };
+  EditPost: { postId: string };
 };
