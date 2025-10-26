@@ -63,7 +63,7 @@ function HomeScreen({ navigation }: Props) {
 
   return (
     <SafeAreaLayout>
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: theme.colors.outline }]}>
         <SegmentedButtons
           value={sortValue}
           onValueChange={(value) => {
@@ -125,7 +125,6 @@ const styles = StyleSheet.create({
   header: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
   },
   list: {
     paddingVertical: 8,

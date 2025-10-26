@@ -1,6 +1,7 @@
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native';
+import { useAppTheme } from '../../providers/ThemeProvider';
 
 export interface SafeAreaLayoutProps {
   children: React.ReactNode;
@@ -8,8 +9,17 @@ export interface SafeAreaLayoutProps {
 }
 
 export function SafeAreaLayout({ children, style }: SafeAreaLayoutProps) {
+  const { theme } = useAppTheme();
+  
   return (
-    <SafeAreaView style={[styles.container, style]} edges={['top', 'bottom']}>
+    <SafeAreaView 
+      style={[
+        styles.container, 
+        { backgroundColor: theme.colors.background },
+        style
+      ]} 
+      edges={['top', 'bottom']}
+    >
       {children}
     </SafeAreaView>
   );
