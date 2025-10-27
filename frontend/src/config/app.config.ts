@@ -14,6 +14,9 @@ interface TestAccounts {
 }
 
 interface AppConfig {
+  dev: {
+    useDummyData: boolean;
+  };
   api: {
     baseUrl: string;
     timeout: number;
@@ -87,6 +90,9 @@ interface AppConfig {
 }
 
 const devConfig: AppConfig = {
+  dev: {
+    useDummyData: true, // 開發期間使用模擬數據
+  },
   api: {
     baseUrl: 'http://localhost:3000',
     timeout: 10000,

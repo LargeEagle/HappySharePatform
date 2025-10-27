@@ -1,26 +1,14 @@
 import { Post, PostsQueryParams, PostsResponse, CreatePostParams } from '../types/post';
+import { appConfig } from '../config/app.config';
+import { dummyPosts, delay } from '../utils/dummyData';
 
-// 模擬文章數據
-const mockPosts: Post[] = Array.from({ length: 50 }, (_, index) => ({
-  id: String(index + 1),
-  title: `測試文章 ${index + 1}`,
-  content: `這是測試文章 ${index + 1} 的內容。分享一些快樂的事情...`,
-  author: {
-    id: '1',
-    username: 'Admin',
-    avatar: null
-  },
-  createdAt: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
-  updatedAt: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
-  likes: Math.floor(Math.random() * 100),
-  comments: Math.floor(Math.random() * 20),
-  tags: ['測試', '快樂', '分享']
-}));
+// 模擬文章數據（開發用）
+const mockPosts: Post[] = [...dummyPosts];
 
 export const postsService = {
   async createPost(params: CreatePostParams): Promise<Post> {
     // 模擬 API 延遲
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await delay();
 
     const newPost: Post = {
       id: String(mockPosts.length + 1),
@@ -28,7 +16,7 @@ export const postsService = {
       author: {
         id: '1',
         username: 'TestUser',
-        avatar: null
+        avatar: 'https://i.pravatar.cc/150?img=1'
       },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -45,7 +33,7 @@ export const postsService = {
 
   async updatePost(id: string, params: Partial<CreatePostParams>): Promise<Post> {
     // 模擬 API 延遲
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await delay();
 
     const index = mockPosts.findIndex(p => p.id === id);
     if (index === -1) {

@@ -1,4 +1,6 @@
 import { Post } from '../types/post';
+import { appConfig } from '../config/app.config';
+import { dummyComments, delay } from '../utils/dummyData';
 
 export interface PostInteractionResponse {
   success: boolean;
@@ -25,12 +27,12 @@ export interface Comment {
 }
 
 // 模擬評論數據
-const mockComments: { [key: string]: Comment[] } = {};
+const mockComments: { [key: string]: Comment[] } = { ...dummyComments };
 
 export const postInteractionService = {
   // 點讚文章
   async toggleLike(postId: string): Promise<PostInteractionResponse> {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await delay();
     
     // 在實際應用中，這裡會調用後端 API
     return {
@@ -41,7 +43,7 @@ export const postInteractionService = {
 
   // 收藏文章
   async toggleBookmark(postId: string): Promise<PostInteractionResponse> {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await delay();
     
     return {
       success: true,
@@ -51,29 +53,17 @@ export const postInteractionService = {
 
   // 獲取文章評論
   async getComments(postId: string, page: number = 1, limit: number = 10) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await delay();
     
-    if (!mockComments[postId]) {
-      mockComments[postId] = Array.from({ length: 20 }, (_, index) => ({
-        id: `${postId}-comment-${index + 1}`,
-        content: `這是第 ${index + 1} 條評論。分享快樂的時刻！`,
-        author: {
-          id: String(Math.floor(Math.random() * 1000)),
-          username: `User${Math.floor(Math.random() * 1000)}`,
-          avatar: null
-        },
-        createdAt: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
-        likes: Math.floor(Math.random() * 50),
-        isLiked: Math.random() > 0.5
-      }));
-    }
+    // 如果沒有該文章的評論，返回空數組
+    const comments = mockComments[postId] || [];
 
     const start = (page - 1) * limit;
     const end = start + limit;
-    const comments = mockComments[postId].slice(start, end);
+    const paginatedComments = comments.slice(start, end);
 
     return {
-      comments,
+      comments: paginatedComments,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(mockComments[postId].length / limit),
@@ -84,7 +74,7 @@ export const postInteractionService = {
 
   // 發表評論
   async createComment(params: CreateCommentParams): Promise<PostInteractionResponse> {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await delay();
     
     const newComment: Comment = {
       id: `${params.postId}-comment-${Date.now()}`,
@@ -92,7 +82,7 @@ export const postInteractionService = {
       author: {
         id: '1', // 應該使用當前登入用戶的ID
         username: 'TestUser',
-        avatar: null
+        avatar: 'https://i.pravatar.cc/150?img=1'
       },
       createdAt: new Date().toISOString(),
       likes: 0,
@@ -113,7 +103,7 @@ export const postInteractionService = {
 
   // 點讚評論
   async toggleCommentLike(postId: string, commentId: string): Promise<PostInteractionResponse> {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await delay();
     
     return {
       success: true,

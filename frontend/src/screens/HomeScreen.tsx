@@ -107,13 +107,13 @@ function HomeScreen({ navigation }: Props) {
           onEndReachedThreshold={0.5}
           ListFooterComponent={renderFooter}
           ListEmptyComponent={
-            !isLoading && (
+            !isLoading ? (
               <View style={styles.emptyContainer}>
                 <Text variant="bodyLarge">
                   目前還沒有任何貼文
                 </Text>
               </View>
-            )
+            ) : null
           }
         />
       )}
