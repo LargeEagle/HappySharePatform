@@ -5,7 +5,9 @@
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Expo](https://img.shields.io/badge/Expo-1B1F23?style=for-the-badge&logo=expo&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
 
 一個注重分享快樂、正向能量的跨平台社交平台
 
@@ -31,6 +33,15 @@ HAPPY SHARE 是一個現代化的社交平台，旨在創造一個讓用戶能�
 - 豐富的模擬文章內容（包含圖片、標籤、互動數據）
 - 真實的評論系統模擬
 - 網路延遲模擬（500ms）提供更真實的開發體驗
+
+### ⚠️ 後端開發狀態
+
+**目前狀態**: 🔄 技術棧遷移中
+
+- **原技術棧**: Express.js + MongoDB + Mongoose
+- **新技術棧**: NestJS + Prisma + PostgreSQL
+- **遷移文檔**: 詳見 [MIGRATION_PLAN.md](./MIGRATION_PLAN.md)
+- **執行狀態**: ⏸️ 待執行（預計明天開始）
 
 ## ✨ 功能特色
 
@@ -89,22 +100,38 @@ HAPPY SHARE 是一個現代化的社交平台，旨在創造一個讓用戶能�
 - **狀態管理**: React Hooks
 - **HTTP 客戶端**: Axios
 
-### 後端（規劃中）
+### 後端（🔄 遷移中）
 
-- **框架**: Node.js + Express
-- **語言**: TypeScript
-- **資料庫**: MongoDB
-- **認證**: JWT
+#### 目標技術棧（即將實現）
+- **框架**: NestJS (TypeScript)
+- **ORM**: Prisma
+- **資料庫**: PostgreSQL
+- **認證**: JWT + Passport
 - **API 規範**: RESTful
+- **測試**: Jest + Supertest
+
+#### 原技術棧（已實現，保留作為參考）
+- **框架**: Express.js
+- **ODM**: Mongoose
+- **資料庫**: MongoDB
+- **認證**: JWT + bcryptjs
+
+**遷移狀態**: 詳見 [MIGRATION_PLAN.md](./MIGRATION_PLAN.md)
 
 ## 🚀 快速開始
 
 ### 環境需求
 
+**前端**
 - Node.js >= 18.0.0
 - npm 或 yarn
 - Expo CLI
 - iOS Simulator (Mac) 或 Android Studio（可選）
+
+**後端（即將實現）**
+- Node.js >= 18.0.0
+- PostgreSQL >= 14.0
+- 或 Supabase 帳號（推薦）
 
 ### 安裝步驟
 
@@ -180,13 +207,33 @@ const devConfig: AppConfig = {
 
 ```
 social-media-platform/
-├── frontend/                # 前端應用
+├── frontend/                # 前端應用（React Native + Expo）
 │   ├── src/
 │   │   ├── components/     # 可重用組件
 │   │   │   ├── common/     # 通用組件
 │   │   │   └── layout/     # 佈局組件
 │   │   ├── screens/        # 頁面組件
 │   │   ├── hooks/          # 自定義 Hooks
+│   │   ├── services/       # API 服務層（Strategy Pattern）
+│   │   ├── utils/          # 工具函數和 Dummy Data
+│   │   ├── config/         # 應用配置
+│   │   ├── types/          # TypeScript 類型定義
+│   │   └── providers/      # Context Providers
+│   └── package.json
+├── backend/                 # 後端 API（⚠️ 遷移中）
+│   └── (即將使用 NestJS + Prisma + PostgreSQL)
+├── backend-express/         # 舊後端（保留作為參考）
+│   ├── src/
+│   │   ├── controllers/    # Express 控制器
+│   │   ├── models/         # Mongoose 模型
+│   │   ├── routes/         # API 路由
+│   │   └── middlewares/    # 中間件
+│   └── package.json
+├── docs/                    # 文檔
+│   └── 開發文件.md
+├── MIGRATION_PLAN.md        # 後端遷移計劃
+└── README.md
+```
 │   │   ├── services/       # API 服務
 │   │   ├── types/          # TypeScript 類型定義
 │   │   ├── utils/          # 工具函數
