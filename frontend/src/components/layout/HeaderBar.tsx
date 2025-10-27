@@ -32,7 +32,10 @@ export function HeaderBar({
 
   const handleProfilePress = () => {
     console.log('HeaderBar: Profile button pressed, user:', user?.username);
-    console.log('HeaderBar: Current navigation state:', navigation.getState());
+    const navState = navigation.getState();
+    console.log('HeaderBar: Current navigation state:', navState);
+    console.log('HeaderBar: Available routes:', navState.routeNames);
+    console.log('HeaderBar: Current index:', navState.index);
     try {
       navigation.navigate('Profile', { userId: user?.id });
       console.log('HeaderBar: Navigation to Profile initiated');
