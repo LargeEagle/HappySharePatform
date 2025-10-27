@@ -1,9 +1,12 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import { StyleSheet, TouchableOpacity } from 'react-native';
+import { Appbar, Avatar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ThemeToggle } from '../common/ThemeToggle';
 import { useAppTheme } from '../../providers/ThemeProvider';
+import { useAuth } from '../../hooks/useAuth';
+import { RootStackParamList } from '../../types/navigation';
 
 export interface HeaderBarProps {
   title: string;
@@ -13,16 +16,23 @@ export interface HeaderBarProps {
     onPress: () => void;
   };
   showThemeToggle?: boolean;
+  showProfile?: boolean;
 }
 
 export function HeaderBar({ 
   title, 
   showBack = true, 
   rightAction,
-  showThemeToggle = true 
+  showThemeToggle = true,
+  showProfile = true
 }: HeaderBarProps) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { theme } = useAppTheme();
+  const { user } = useAuth();
+
+  const handleProfilePress = () => {
+    navigation.navigate('Profile', {});
+  };
 
   return (
     <Appbar.Header
@@ -41,6 +51,15 @@ export function HeaderBar({
         titleStyle={{ color: theme.colors.onSurface }}
       />
       {showThemeToggle && <ThemeToggle />}
+      {showProfile && user && (
+        <TouchableOpacity onPress={handleProfilePress} style={styles.avatarContainer}>
+          <Avatar.Text
+            size={36}
+            label={user.username.substring(0, 2).toUpperCase()}
+            style={[styles.avatar, { backgroundColor: theme.colors.primary }]}
+          />
+        </TouchableOpacity>
+      )}
       {rightAction && (
         <Appbar.Action 
           icon={rightAction.icon} 
@@ -54,5 +73,11 @@ export function HeaderBar({
 const styles = StyleSheet.create({
   header: {
     elevation: 4,
+  },
+  avatarContainer: {
+    marginHorizontal: 8,
+  },
+  avatar: {
+    
   },
 });

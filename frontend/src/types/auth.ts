@@ -1,13 +1,32 @@
 export type UserRole = 'admin' | 'user';
 
+export interface UserStats {
+  postsCount: number;
+  followersCount: number;
+  followingCount: number;
+  likesCount: number;
+}
+
 export interface User {
   id: string;
   email: string;
   username: string;
   role: UserRole;
   avatar?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  stats?: UserStats;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UpdateProfileData {
+  username?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  avatar?: string;
 }
 
 export interface AuthState {
