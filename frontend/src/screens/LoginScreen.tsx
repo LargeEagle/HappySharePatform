@@ -20,6 +20,8 @@ export function LoginScreen({ navigation }: Props) {
 
   const handleLogin = async () => {
     try {
+      console.log('LoginScreen: Starting login process...');
+      
       // 記錄功能使用
       addChange({
         component: 'LoginScreen',
@@ -29,7 +31,11 @@ export function LoginScreen({ navigation }: Props) {
 
       const result = await login({ email, password });
       
+      console.log('LoginScreen: Login result:', result);
+      
       if (result.success) {
+        console.log('LoginScreen: Login successful, user:', result.user);
+        
         // 更新開發文檔
         updateDevDocs({
           type: 'feature',
@@ -41,11 +47,13 @@ export function LoginScreen({ navigation }: Props) {
           ]
         });
         
-        // 導航到主頁面
-        navigation.replace('Home');
+        // 不需要手動導航，App.tsx 會根據 isAuthenticated 自動切換
+        console.log('LoginScreen: Authentication complete, waiting for auto-navigation...');
+      } else {
+        console.error('LoginScreen: Login failed:', result.error);
       }
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('LoginScreen: Login error:', err);
       addChange({
         component: 'LoginScreen',
         changeType: 'updated',

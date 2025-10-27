@@ -31,12 +31,13 @@ export function HeaderBar({
   const { user } = useAuth();
 
   const handleProfilePress = () => {
-    console.log('Profile button pressed, user:', user?.username);
+    console.log('HeaderBar: Profile button pressed, user:', user?.username);
+    console.log('HeaderBar: Current navigation state:', navigation.getState());
     try {
-      navigation.navigate('Profile', {});
-      console.log('Navigation to Profile successful');
+      navigation.navigate('Profile', { userId: user?.id });
+      console.log('HeaderBar: Navigation to Profile initiated');
     } catch (error) {
-      console.error('Navigation error:', error);
+      console.error('HeaderBar: Navigation error:', error);
     }
   };
 

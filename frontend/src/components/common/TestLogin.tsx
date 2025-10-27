@@ -25,17 +25,17 @@ export function TestLogin({ navigation }: TestLoginProps) {
     
     try {
       // 嘗試登入前記錄
-      console.log(`Attempting to login with ${accountType} account:`, account.email);
+      console.log(`TestLogin: Attempting to login with ${accountType} account:`, account.email);
       
       const result = await login({
         email: account.email,
         password: account.password
       });
 
-      console.log('Login result:', result);
+      console.log('TestLogin: Login result:', result);
 
       if (result.success) {
-        console.log('Login successful:', result.user);
+        console.log('TestLogin: Login successful, user:', result.user);
         
         // 登入成功後記錄
         updateDevDocs({
@@ -48,17 +48,17 @@ export function TestLogin({ navigation }: TestLoginProps) {
           ]
         });
         
-        // 導航到主頁面
-        navigation.replace('Home');
+        // 不需要手動導航，App.tsx 會根據 isAuthenticated 自動切換
+        console.log('TestLogin: Authentication complete, waiting for auto-navigation...');
       } else {
-        console.error('Login failed:', result.error);
+        console.error('TestLogin: Login failed:', result.error);
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('TestLogin: Login error:', error);
     } finally {
       setLoadingStates(prev => ({ ...prev, [accountType]: false }));
     }
-  }, [login, navigation]);
+  }, [login]);
 
   return (
     <Card style={styles.container}>
