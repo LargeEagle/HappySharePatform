@@ -18,7 +18,23 @@ function PostDetailScreen({ route, navigation }: Props) {
   const { postId } = route.params;
   const { post, isLoading, error } = usePost(postId);
   const { deletePost, togglePublish, isLoading: isManaging } = usePostManagement();
+  
+  // ⚠️ 重要：所有 hooks 必須在條件渲染之前調用
+  const { 
+    comments,
+    isLoading: isLoadingComments,
+    error: commentError,
+    hasMore,
+    createComment,
+    toggleCommentLike,
+    togglePostLike,
+    toggleBookmark,
+    loadMoreComments,
+    refreshComments
+  } = usePostInteraction({ postId });
+  
   const [menuVisible, setMenuVisible] = useState(false);
+  const [isCommentsVisible, setCommentsVisible] = useState(false);
 
   const handleEdit = () => {
     setMenuVisible(false);
@@ -96,21 +112,6 @@ function PostDetailScreen({ route, navigation }: Props) {
       </SafeAreaLayout>
     );
   }
-
-  const { 
-    comments,
-    isLoading: isLoadingComments,
-    error: commentError,
-    hasMore,
-    createComment,
-    toggleCommentLike,
-    togglePostLike,
-    toggleBookmark,
-    loadMoreComments,
-    refreshComments
-  } = usePostInteraction({ postId });
-
-  const [isCommentsVisible, setCommentsVisible] = useState(false);
 
   const handleShowComments = () => {
     setCommentsVisible(true);
