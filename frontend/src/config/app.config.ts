@@ -91,10 +91,10 @@ interface AppConfig {
 
 const devConfig: AppConfig = {
   dev: {
-    useDummyData: true, // 開發期間使用模擬數據
+    useDummyData: true, // 開發期間使用模擬數據 (改為 false 使用真實後端)
   },
   api: {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://localhost:5000', // 後端 API 地址
     timeout: 10000,
   },
   auth: {
