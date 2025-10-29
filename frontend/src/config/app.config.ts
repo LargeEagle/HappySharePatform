@@ -91,10 +91,10 @@ interface AppConfig {
 
 const devConfig: AppConfig = {
   dev: {
-    useDummyData: true, // 開發期間使用模擬數據 (改為 false 使用真實後端)
+    useDummyData: false, // 使用真實後端 API
   },
   api: {
-    baseUrl: 'http://localhost:5000', // 後端 API 地址
+    baseUrl: 'http://localhost:5000/api', // 使用 localhost（在瀏覽器中兼容性更好）
     timeout: 10000,
   },
   auth: {
@@ -179,21 +179,21 @@ export const appConfig = __DEV__ ? devConfig : prodConfig;
 // Test Account Configuration
 export const testAccounts = {
   admin: {
-    email: 'admin@happyshare.test',
-    password: 'Admin@123',
-    username: 'Admin',
-    role: 'admin'
+    email: 'alice@happyshare.com',
+    password: 'Test@1234',
+    username: 'alice',
+    role: 'user'
   },
   user: {
-    email: 'user@happyshare.test',
-    password: 'User@123',
-    username: 'TestUser',
+    email: 'bob@happyshare.com',
+    password: 'Test@1234',
+    username: 'bob',
     role: 'user'
   },
   demo: {
-    email: 'demo@happyshare.test',
-    password: 'Demo@123',
-    username: 'DemoUser',
+    email: 'carol@happyshare.com',
+    password: 'Test@1234',
+    username: 'carol',
     role: 'user'
   }
 };

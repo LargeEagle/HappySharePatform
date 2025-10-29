@@ -1,0 +1,39 @@
+{
+  "name": "happy-share-platform",
+  "version": "1.0.0",
+  "description": "HAPPY SHARE - 社交媒體平台",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:frontend": "cd frontend && npm start",
+    "test:api": "cd testing-tools && npm run test",
+    "test:api:html": "cd testing-tools && npm run test -- --format html",
+    "test:api:json": "cd testing-tools && npm run test -- --format json",
+    "test:api:markdown": "cd testing-tools && npm run test -- --format markdown",
+    "test:api:verbose": "cd testing-tools && npm run test -- --verbose",
+    "test:login": "curl -X POST http://localhost:5000/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"alice@happyshare.com\",\"password\":\"Test@1234\"}'",
+    "test:health": "curl http://localhost:5000/api",
+    "setup": "npm run setup:backend && npm run setup:frontend && npm run setup:testing",
+    "setup:backend": "cd backend && npm install",
+    "setup:frontend": "cd frontend && npm install",
+    "setup:testing": "cd testing-tools && npm install",
+    "db:seed": "cd backend && npx ts-node prisma/seed.ts",
+    "db:migrate": "cd backend && npx prisma migrate dev",
+    "db:studio": "cd backend && npx prisma studio",
+    "clean": "rm -rf backend/node_modules frontend/node_modules testing-tools/node_modules",
+    "clean:cache": "rm -rf backend/dist frontend/.expo testing-tools/dist"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "social-media",
+    "nestjs",
+    "react-native",
+    "postgresql",
+    "prisma"
+  ],
+  "author": "HAPPY SHARE Team",
+  "license": "MIT"
+}

@@ -1,39 +1,81 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Chip, Portal, Modal, List, useTheme } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { TextInput, Button, Chip, Portal, Modal, List, useTheme, Text, Divider } from 'react-native-paper';
 import { SafeAreaLayout } from '../components/layout';
+import { TagsList } from '../components/common';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { usePost } from '../hooks/usePost';
+import { tagsService } from '../services';
+import type { Tag } from '../types/search';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreatePost'>;
-
-const PREDEFINED_TAGS = [
-  '日常', '美食', '旅遊', '音樂', '電影',
-  '運動', '寵物', '攝影', '藝術', '科技',
-  '閱讀', '心情', '學習', '工作', '生活'
-];
 
 export function CreatePostScreen({ navigation }: Props) {
   const { colors } = useTheme();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [popularTags, setPopularTags] = useState<Tag[]>([]);
+  const [customTag, setCustomTag] = useState('');
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingTags, setIsLoadingTags] = useState(false);
 
   const { createPost } = usePost();
 
-  const handleAddTag = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(tags => tags.filter(t => t !== tag));
-    } else if (selectedTags.length < 5) {
-      setSelectedTags(tags => [...tags, tag]);
+  // 載入熱門標籤
+  useEffect(() => {
+    loadPopularTags();
+  }, []);
+
+  const loadPopularTags = async () => {
+    try {
+      setIsLoadingTags(true);
+      const tags = await tagsService.getPopularTags(15);
+      setPopularTags(tags);
+    } catch (error) {
+      console.error('Failed to load popular tags:', error);
+    } finally {
+      setIsLoadingTags(false);
     }
   };
 
+  const handleAddTag = (tagName: string) => {
+    const normalizedTag = tagName.trim();
+    if (!normalizedTag) return;
+
+    if (selectedTags.includes(normalizedTag)) {
+      setSelectedTags(tags => tags.filter(t => t !== normalizedTag));
+    } else if (selectedTags.length < 5) {
+      setSelectedTags(tags => [...tags, normalizedTag]);
+    } else {
+      Alert.alert('提示', '最多只能選擇 5 個標籤');
+    }
+  };
+
+  const handleAddCustomTag = () => {
+    if (!customTag.trim()) return;
+    
+    if (customTag.trim().length < 2) {
+      Alert.alert('提示', '標籤名稱至少需要 2 個字符');
+      return;
+    }
+
+    if (customTag.trim().length > 20) {
+      Alert.alert('提示', '標籤名稱不能超過 20 個字符');
+      return;
+    }
+
+    handleAddTag(customTag.trim());
+    setCustomTag('');
+  };
+
   const handleSubmit = async () => {
-    if (!title.trim() || !content.trim()) return;
+    if (!title.trim() || !content.trim()) {
+      Alert.alert('提示', '請填寫標題和內容');
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -42,10 +84,12 @@ export function CreatePostScreen({ navigation }: Props) {
         content: content.trim(),
         tags: selectedTags
       });
-      navigation.navigate('Home');
+      Alert.alert('成功', '文章已發布', [
+        { text: '確定', onPress: () => navigation.navigate('Home') }
+      ]);
     } catch (error) {
-      // TODO: 顯示錯誤訊息
       console.error('發布文章失敗:', error);
+      Alert.alert('錯誤', '發布文章失敗，請重試');
     } finally {
       setIsSubmitting(false);
     }
@@ -122,20 +166,70 @@ export function CreatePostScreen({ navigation }: Props) {
               { backgroundColor: colors.surface }
             ]}
           >
-            <List.Section title="選擇標籤（最多5個）">
-              {PREDEFINED_TAGS.map(tag => (
-                <List.Item
-                  key={tag}
-                  title={tag}
-                  onPress={() => handleAddTag(tag)}
-                  right={props =>
-                    selectedTags.includes(tag) ? (
-                      <List.Icon {...props} icon="check" />
-                    ) : null
-                  }
-                />
-              ))}
-            </List.Section>
+            <ScrollView style={styles.modalContent}>
+              {/* 自定義標籤輸入 */}
+              <View style={styles.customTagSection}>
+                <Text variant="titleMedium" style={styles.sectionTitle}>
+                  自定義標籤
+                </Text>
+                <View style={styles.customTagInput}>
+                  <TextInput
+                    mode="outlined"
+                    label="輸入標籤名稱"
+                    value={customTag}
+                    onChangeText={setCustomTag}
+                    maxLength={20}
+                    placeholder="例如：旅行、美食"
+                    style={styles.customTagField}
+                    onSubmitEditing={handleAddCustomTag}
+                  />
+                  <Button
+                    mode="contained"
+                    onPress={handleAddCustomTag}
+                    disabled={!customTag.trim()}
+                    style={styles.addButton}
+                  >
+                    添加
+                  </Button>
+                </View>
+              </View>
+
+              <Divider style={styles.divider} />
+
+              {/* 熱門標籤 */}
+              <View style={styles.popularTagsSection}>
+                <Text variant="titleMedium" style={styles.sectionTitle}>
+                  熱門標籤（最多選擇 5 個）
+                </Text>
+                {isLoadingTags ? (
+                  <Text style={styles.loadingText}>載入中...</Text>
+                ) : (
+                  <View style={styles.tagsGrid}>
+                    {popularTags.map((tag) => (
+                      <Chip
+                        key={tag.id}
+                        selected={selectedTags.includes(tag.name)}
+                        onPress={() => handleAddTag(tag.name)}
+                        style={[
+                          styles.popularTag,
+                          selectedTags.includes(tag.name) && styles.selectedPopularTag
+                        ]}
+                      >
+                        #{tag.name} ({tag.postsCount})
+                      </Chip>
+                    ))}
+                  </View>
+                )}
+              </View>
+
+              <Button
+                mode="text"
+                onPress={() => setShowTagSelector(false)}
+                style={styles.closeButton}
+              >
+                完成
+              </Button>
+            </ScrollView>
           </Modal>
         </Portal>
       </KeyboardAvoidingView>
@@ -180,7 +274,51 @@ const styles = StyleSheet.create({
   },
   modal: {
     margin: 20,
+    maxHeight: '80%',
+    borderRadius: 12,
+  },
+  modalContent: {
     padding: 20,
-    borderRadius: 8,
+  },
+  customTagSection: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    marginBottom: 12,
+    fontWeight: '600',
+  },
+  customTagInput: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  customTagField: {
+    flex: 1,
+  },
+  addButton: {
+    justifyContent: 'center',
+  },
+  divider: {
+    marginVertical: 16,
+  },
+  popularTagsSection: {
+    marginBottom: 16,
+  },
+  loadingText: {
+    textAlign: 'center',
+    marginVertical: 16,
+  },
+  tagsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  popularTag: {
+    marginBottom: 8,
+  },
+  selectedPopularTag: {
+    backgroundColor: '#007AFF20',
+  },
+  closeButton: {
+    marginTop: 16,
   },
 });

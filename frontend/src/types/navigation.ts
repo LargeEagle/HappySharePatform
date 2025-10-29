@@ -7,4 +7,6 @@ export type RootStackParamList = {
   CreatePost: undefined;
   PostDetails: { postId: string };
   EditPost: { postId: string };
+  Search: undefined;
+  TagPosts: { slug: string };
 };

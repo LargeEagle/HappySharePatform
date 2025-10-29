@@ -11,6 +11,7 @@ export interface User {
   id: string;
   email: string;
   username: string;
+  name?: string; // 用戶顯示名稱
   role: UserRole;
   avatar?: string;
   bio?: string;

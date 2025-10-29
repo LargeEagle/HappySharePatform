@@ -1,0 +1,337 @@
+{
+  "projectName": "HAPPY SHARE API",
+  "baseUrl": "http://localhost:5000/api",
+  "timeout": 30000,
+  "verbose": true,
+  "globalHeaders": {
+    "Content-Type": "application/json"
+  },
+  "globalVariables": {
+    "testEmail": "alice@happyshare.com",
+    "testPassword": "Test@1234"
+  },
+  "testSuites": [
+    {
+      "name": "認證測試",
+      "description": "測試用戶註冊、登入和認證功能",
+      "tests": [
+        {
+          "name": "健康檢查",
+          "description": "測試 API 是否可用",
+          "method": "GET",
+          "path": "/",
+          "expect": {
+            "status": 200
+          }
+        },
+        {
+          "name": "用戶登入",
+          "description": "使用測試帳號登入",
+          "method": "POST",
+          "path": "/auth/login",
+          "body": {
+            "email": "{{testEmail}}",
+            "password": "{{testPassword}}"
+          },
+          "expect": {
+            "status": 201,
+            "body": {
+              "success": true,
+              "data.token": "{{NOT_EMPTY}}",
+              "data.user.email": "{{ANY}}"
+            }
+          },
+          "extract": {
+            "token": "data.token",
+            "userId": "data.user.id",
+            "username": "data.user.username"
+          }
+        },
+        {
+          "name": "獲取當前用戶信息",
+          "description": "使用 token 獲取用戶信息",
+          "method": "GET",
+          "path": "/auth/me",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data.user.id": "{{userId}}"
+            }
+          },
+          "dependencies": ["token", "userId"]
+        },
+        {
+          "name": "未授權訪問（無 token）",
+          "description": "測試未授權訪問是否被拒絕",
+          "method": "GET",
+          "path": "/auth/me",
+          "expect": {
+            "status": 401
+          }
+        }
+      ]
+    },
+    {
+      "name": "文章測試",
+      "description": "測試文章的 CRUD 操作",
+      "tests": [
+        {
+          "name": "獲取文章列表",
+          "description": "獲取所有已發布的文章",
+          "method": "GET",
+          "path": "/posts",
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data.posts": "{{NOT_EMPTY}}"
+            }
+          },
+          "extract": {
+            "firstPostId": "data.posts.0.id"
+          }
+        },
+        {
+          "name": "獲取單篇文章",
+          "description": "獲取文章詳情",
+          "method": "GET",
+          "path": "/posts/{{firstPostId}}",
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data.id": "{{ANY}}"
+            }
+          },
+          "dependencies": ["firstPostId"]
+        },
+        {
+          "name": "創建文章",
+          "description": "創建新文章（需要認證）",
+          "method": "POST",
+          "path": "/posts",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "body": {
+            "title": "自動化測試文章",
+            "content": "這是由自動化測試工具創建的文章",
+            "published": true
+          },
+          "expect": {
+            "status": 201,
+            "body": {
+              "success": true,
+              "data.post.title": "自動化測試文章"
+            }
+          },
+          "extract": {
+            "newPostId": "data.post.id"
+          },
+          "dependencies": ["token"]
+        },
+        {
+          "name": "更新文章",
+          "description": "更新剛創建的文章",
+          "method": "PUT",
+          "path": "/posts/{{newPostId}}",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "body": {
+            "title": "更新後的測試文章",
+            "content": "內容已更新"
+          },
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data.post.title": "更新後的測試文章"
+            }
+          },
+          "dependencies": ["token", "newPostId"]
+        },
+        {
+          "name": "點讚文章",
+          "description": "為文章點讚",
+          "method": "POST",
+          "path": "/posts/{{newPostId}}/like",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true
+            }
+          },
+          "dependencies": ["token", "newPostId"]
+        },
+        {
+          "name": "收藏文章",
+          "description": "收藏文章",
+          "method": "POST",
+          "path": "/posts/{{newPostId}}/bookmark",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true
+            }
+          },
+          "dependencies": ["token", "newPostId"]
+        },
+        {
+          "name": "刪除文章",
+          "description": "刪除測試文章",
+          "method": "DELETE",
+          "path": "/posts/{{newPostId}}",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true
+            }
+          },
+          "dependencies": ["token", "newPostId"]
+        }
+      ]
+    },
+    {
+      "name": "評論測試",
+      "description": "測試評論功能",
+      "tests": [
+        {
+          "name": "獲取文章評論",
+          "description": "獲取指定文章的評論列表",
+          "method": "GET",
+          "path": "/comments/posts/{{firstPostId}}/comments",
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true
+            }
+          },
+          "dependencies": ["firstPostId"]
+        },
+        {
+          "name": "創建評論",
+          "description": "為文章添加評論",
+          "method": "POST",
+          "path": "/comments/posts/{{firstPostId}}/comments",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "body": {
+            "content": "這是自動化測試創建的評論"
+          },
+          "expect": {
+            "status": 201,
+            "body": {
+              "success": true,
+              "data.comment.content": "這是自動化測試創建的評論"
+            }
+          },
+          "extract": {
+            "commentId": "data.comment.id"
+          },
+          "dependencies": ["token", "firstPostId"]
+        },
+        {
+          "name": "為評論點讚",
+          "description": "為評論點讚",
+          "method": "POST",
+          "path": "/comments/{{commentId}}/like",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true
+            }
+          },
+          "dependencies": ["token", "commentId"]
+        },
+        {
+          "name": "刪除評論",
+          "description": "刪除測試評論",
+          "method": "DELETE",
+          "path": "/comments/{{commentId}}",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true
+            }
+          },
+          "dependencies": ["token", "commentId"]
+        }
+      ]
+    },
+    {
+      "name": "用戶測試",
+      "description": "測試用戶相關功能",
+      "tests": [
+        {
+          "name": "獲取用戶信息",
+          "description": "獲取指定用戶的公開信息",
+          "method": "GET",
+          "path": "/users/{{userId}}",
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data.user.id": "{{userId}}"
+            }
+          },
+          "dependencies": ["userId"]
+        },
+        {
+          "name": "獲取用戶文章",
+          "description": "獲取用戶發布的所有文章",
+          "method": "GET",
+          "path": "/users/{{userId}}/posts",
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true
+            }
+          },
+          "dependencies": ["userId"]
+        },
+        {
+          "name": "更新用戶信息",
+          "description": "更新當前用戶的個人信息",
+          "method": "PUT",
+          "path": "/users/{{userId}}",
+          "headers": {
+            "Authorization": "Bearer {{token}}"
+          },
+          "body": {
+            "name": "測試用戶（已更新）",
+            "bio": "這是自動化測試更新的簡介"
+          },
+          "expect": {
+            "status": 200,
+            "body": {
+              "success": true,
+              "data.user.bio": "這是自動化測試更新的簡介"
+            }
+          },
+          "dependencies": ["token", "userId"]
+        }
+      ]
+    }
+  ]
+}

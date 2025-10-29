@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 import { ActivityIndicator, Text, Avatar, Chip, IconButton, Surface, Portal, Modal, Menu, Button } from 'react-native-paper';
 import { SafeAreaLayout } from '../components/layout';
+import { TagsList } from '../components/common';
 import { useAppTheme } from '../providers/ThemeProvider';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
@@ -172,7 +173,18 @@ function PostDetailScreen({ route, navigation }: Props) {
             </Menu>
           </View>
           
-          {post.tags && post.tags.length > 0 && (
+          {/* 標籤顯示 - 支持新舊兩種格式 */}
+          {post.postTags && post.postTags.length > 0 && (
+            <View style={styles.tags}>
+              <TagsList
+                tags={post.postTags.map(pt => pt.tag)}
+                variant="filled"
+                horizontal={true}
+              />
+            </View>
+          )}
+          {/* 舊格式標籤，向後兼容 */}
+          {!post.postTags && post.tags && post.tags.length > 0 && (
             <View style={styles.tags}>
               {post.tags.map((tag: string) => (
                 <Chip 

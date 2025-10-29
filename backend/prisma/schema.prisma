@@ -1,0 +1,209 @@
+// HAPPY SHARE - Prisma Schema
+// 社交平台數據庫模型定義
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 用戶模型
+model User {
+  id              String    @id @default(uuid())
+  username        String    @unique
+  email           String    @unique
+  password        String
+  name            String?
+  bio             String?   @db.Text
+  avatar          String?
+  location        String?
+  website         String?
+  postsCount      Int       @default(0)
+  followersCount  Int       @default(0)
+  followingCount  Int       @default(0)
+  totalLikes      Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // 關聯
+  posts           Post[]
+  comments        Comment[]
+  likes           Like[]
+  bookmarks       Bookmark[]
+  attachments     Attachment[]      // 新增：用戶上傳的文件
+  searchHistory   SearchHistory[]   // 新增：搜尋歷史
+  
+  @@index([username])   // 新增：搜尋索引
+  @@index([name])       // 新增：搜尋索引
+  @@map("users")
+}
+
+// 文章模型
+model Post {
+  id              String    @id @default(uuid())
+  title           String
+  content         String    @db.Text
+  image           String?
+  isPublished     Boolean   @default(true)
+  likesCount      Int       @default(0)
+  commentsCount   Int       @default(0)
+  bookmarksCount  Int       @default(0)
+  authorId        String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // 關聯
+  author          User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments        Comment[]
+  likes           Like[]
+  bookmarks       Bookmark[]
+  attachments     Attachment[] // 新增：文章附件
+  postTags        PostTag[]    // 新增：文章標籤關聯
+  
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([isPublished])
+  @@index([title])                        // 新增：標題搜尋索引
+  @@index([isPublished, likesCount])      // 新增：熱門排序索引
+  @@map("posts")
+}
+
+// 評論模型
+model Comment {
+  id         String   @id @default(uuid())
+  content    String   @db.Text
+  likesCount Int      @default(0)
+  authorId   String
+  postId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  // 關聯
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  likes      Like[]
+  
+  @@index([postId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("comments")
+}
+
+// 點讚模型 (支持文章和評論)
+model Like {
+  id         String   @id @default(uuid())
+  userId     String
+  postId     String?
+  commentId  String?
+  createdAt  DateTime @default(now())
+  
+  // 關聯
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post       Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment    Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  
+  // 確保用戶對同一項目只能點讚一次
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+  @@index([postId])
+  @@index([commentId])
+  @@map("likes")
+}
+
+// 收藏模型
+model Bookmark {
+  id        String   @id @default(uuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+  
+  // 關聯
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  // 確保用戶對同一文章只能收藏一次
+  @@unique([userId, postId])
+  @@index([userId])
+  @@index([postId])
+  @@map("bookmarks")
+}
+
+// ===== 搜尋功能相關模型 =====
+
+// 附件模型（文件搜尋）
+model Attachment {
+  id           String   @id @default(uuid())
+  filename     String   // 系統生成的文件名
+  originalName String   // 原始文件名（用戶上傳時的名稱）
+  url          String   // 文件 URL
+  mimeType     String   // 文件類型 (image/jpeg, application/pdf, etc.)
+  size         Int      // 文件大小（bytes）
+  
+  postId       String
+  uploaderId   String
+  createdAt    DateTime @default(now())
+  
+  // 關聯
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  uploader     User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  
+  @@index([filename])      // 文件名搜尋索引
+  @@index([originalName])  // 原始名稱搜尋索引
+  @@index([postId])
+  @@map("attachments")
+}
+
+// Hashtag 標籤模型
+model Tag {
+  id          String    @id @default(uuid())
+  name        String    @unique  // 標籤名稱（如：旅遊、美食）
+  slug        String    @unique  // URL 友好的標籤（如：travel、food）
+  description String?   @db.Text // 標籤描述
+  postsCount  Int       @default(0)  // 使用此標籤的文章數
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // 關聯
+  postTags    PostTag[]
+  
+  @@index([name])       // 標籤名稱搜尋索引
+  @@index([slug])       // URL slug 索引
+  @@index([postsCount]) // 熱門標籤排序索引
+  @@map("tags")
+}
+
+// 文章-標籤 關聯表（多對多）
+model PostTag {
+  id        String   @id @default(uuid())
+  postId    String
+  tagId     String
+  createdAt DateTime @default(now())
+  
+  // 關聯
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@unique([postId, tagId])  // 確保同一文章不會重複添加相同標籤
+  @@index([postId])
+  @@index([tagId])
+  @@map("post_tags")
+}
+
+// 搜尋歷史模型
+model SearchHistory {
+  id        String   @id @default(uuid())
+  userId    String?  // null 表示未登入用戶
+  query     String   // 搜尋關鍵字
+  type      String   // 搜尋類型：all, posts, users, files, tags
+  createdAt DateTime @default(now())
+  
+  // 關聯
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([createdAt])
+  @@map("search_history")
+}

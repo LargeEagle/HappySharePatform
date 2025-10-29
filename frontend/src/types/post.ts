@@ -1,7 +1,14 @@
+import type { Tag } from './search';
+
 export interface Author {
   id: string;
   username: string;
   avatar?: string | null;
+}
+
+export interface PostTag {
+  id: string;
+  tag: Tag;
 }
 
 export interface Post {
@@ -14,7 +21,8 @@ export interface Post {
   likes: number;
   comments: number;
   images?: string[];
-  tags?: string[];
+  tags?: string[]; // 舊格式，向後兼容
+  postTags?: PostTag[]; // 新格式
   isLiked?: boolean;
   isBookmarked?: boolean;
   isPublished?: boolean;

@@ -19,7 +19,7 @@ export const userApiService = {
    * 獲取用戶個人資料
    */
   async getUserProfile(userId: string): Promise<User> {
-    const response = await apiClient.get<ApiResponse<{ user: User }>>(`/api/users/${userId}`);
+    const response = await apiClient.get<ApiResponse<{ user: User }>>(`/users/${userId}`);
     return response.data.user;
   },
 
@@ -27,7 +27,7 @@ export const userApiService = {
    * 更新用戶個人資料
    */
   async updateUserProfile(userId: string, data: UpdateProfileData): Promise<User> {
-    const response = await apiClient.put<ApiResponse<{ user: User }>>(`/api/users/${userId}`, data);
+    const response = await apiClient.put<ApiResponse<{ user: User }>>(`/users/${userId}`, data);
     return response.data.user;
   },
 
@@ -39,7 +39,7 @@ export const userApiService = {
     page: number = 1,
     limit: number = 10
   ): Promise<{ posts: Post[]; hasMore: boolean; total: number }> {
-    const response = await apiClient.get<ApiResponse<{ posts: Post[]; total: number }>>(`/api/users/${userId}/posts`, {
+    const response = await apiClient.get<ApiResponse<{ posts: Post[]; total: number }>>(`/users/${userId}/posts`, {
       params: { page, limit },
     });
     return {
@@ -55,7 +55,7 @@ export const userApiService = {
   async uploadAvatar(userId: string, imageUri: string): Promise<string> {
     // 暫時使用 URL 上傳（後端簡化版）
     const response = await apiClient.post<ApiResponse<{ avatar: string }>>(
-      `/api/users/avatar`,
+      `/users/avatar`,
       { avatarUrl: imageUri }
     );
 

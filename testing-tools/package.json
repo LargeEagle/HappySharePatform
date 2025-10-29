@@ -1,0 +1,39 @@
+{
+  "name": "@testing-tools/api-tester",
+  "version": "1.0.0",
+  "description": "通用 API 自動化測試工具 - 可在多個項目中使用",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "api-test": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli.js",
+    "dev": "ts-node src/cli.ts",
+    "test": "jest",
+    "test:example": "ts-node src/cli.ts run --config examples/happyshare.config.json"
+  },
+  "keywords": [
+    "api",
+    "testing",
+    "automation",
+    "rest",
+    "e2e",
+    "integration"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "chalk": "^4.1.2",
+    "commander": "^12.0.0",
+    "dotenv": "^17.2.3",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

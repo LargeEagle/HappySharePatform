@@ -1,193 +1,215 @@
-# 後端 README
+# HAPPY SHARE Backend API
 
-## 🚀 快速開始
+## 🚀 技術棧
 
-### 前置要求
-- Node.js 18+
-- MongoDB 5.0+ (本地安裝) 或 MongoDB Atlas (雲端)
+- **框架**: NestJS (TypeScript)
+- **ORM**: Prisma
+- **數據庫**: PostgreSQL
+- **認證**: JWT + bcryptjs
+- **API風格**: RESTful
 
-### 安裝步驟
+## 📦 安裝
 
-#### 1. 安裝依賴
 ```bash
 npm install
 ```
 
-#### 2. 配置環境變數
-複製 `.env` 文件並修改配置：
-```bash
-# .env
-PORT=5000
+## ⚙️ 環境配置
+
+創建 `.env` 文件：
+
+```env
 NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/social-media-platform
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+PORT=5000
+
+# JWT 配置
+JWT_SECRET=your-super-secret-jwt-key
 JWT_EXPIRES_IN=7d
+
+# PostgreSQL 數據庫
+DATABASE_URL="postgresql://user:password@localhost:5432/social_media?schema=public"
 ```
 
-#### 3. 啟動 MongoDB
+## 🗄️ 數據庫設置
 
-**Windows (本地)**:
+### 使用 Supabase (推薦)
+
+1. 前往 [Supabase](https://supabase.com/) 創建免費帳戶
+2. 創建新項目
+3. 獲取連接字符串並更新 `.env`
+4. 運行遷移：
+
 ```bash
-# MongoDB 通常作為服務自動運行
-net start MongoDB
-
-# 或手動啟動
-mongod
+npx prisma migrate dev
 ```
 
-**使用 MongoDB Atlas (推薦)**:
-1. 訪問 https://www.mongodb.com/cloud/atlas
-2. 創建免費集群
-3. 獲取連接字符串
-4. 更新 `.env` 中的 `MONGODB_URI`
+### 使用本地 PostgreSQL
 
-#### 4. 啟動開發服務器
+1. 安裝 PostgreSQL
+2. 創建數據庫：
 
-**Windows**:
 ```bash
-start-dev.bat
+createdb social_media
 ```
 
-**或使用 npm**:
+3. 更新 `.env` 中的 `DATABASE_URL`
+4. 運行遷移：
+
 ```bash
-npm run dev
+npx prisma migrate dev
 ```
 
-服務器將運行在 http://localhost:5000
+## 🏃 運行應用
 
----
+### 開發模式
+
+```bash
+npm run start:dev
+```
+
+### 生產模式
+
+```bash
+npm run build
+npm run start:prod
+```
+
+## 📡 API 端點
+
+### 認證 API (`/api/auth`)
+
+- `POST /auth/register` - 用戶註冊
+- `POST /auth/login` - 用戶登入
+- `GET /auth/me` - 獲取當前用戶 (需認證)
+
+### 用戶 API (`/api/users`)
+
+- `GET /users/:id` - 獲取用戶資料
+- `PUT /users/:id` - 更新用戶資料 (需認證)
+- `GET /users/:id/posts` - 獲取用戶的文章
+- `POST /users/avatar` - 上傳頭像 (需認證)
+
+### 文章 API (`/api/posts`)
+
+- `GET /posts` - 獲取所有文章 (支持分頁)
+- `GET /posts/:id` - 獲取單篇文章
+- `POST /posts` - 創建文章 (需認證)
+- `PUT /posts/:id` - 更新文章 (需認證)
+- `DELETE /posts/:id` - 刪除文章 (需認證)
+- `POST /posts/:id/like` - 切換點讚 (需認證)
+- `POST /posts/:id/bookmark` - 切換收藏 (需認證)
+
+### 評論 API (`/api/comments`)
+
+- `GET /comments/posts/:postId/comments` - 獲取文章評論
+- `POST /comments/posts/:postId/comments` - 創建評論 (需認證)
+- `DELETE /comments/:id` - 刪除評論 (需認證)
+- `POST /comments/:id/like` - 切換評論點讚 (需認證)
+
+## 🗃️ 數據庫模型
+
+- **User** - 用戶信息
+- **Post** - 文章內容
+- **Comment** - 評論
+- **Like** - 點讚 (支持文章和評論)
+- **Bookmark** - 收藏
+
+## 🔐 認證
+
+所有需要認證的端點需要在 Header 中包含:
+
+```
+Authorization: Bearer <token>
+```
+
+## 📝 API 響應格式
+
+### 成功響應
+
+```json
+{
+  "success": true,
+  "message": "操作成功",
+  "data": {
+    // 實際數據
+  }
+}
+```
+
+### 錯誤響應
+
+```json
+{
+  "success": false,
+  "message": "錯誤訊息",
+  "statusCode": 400
+}
+```
+
+## 🛠️ 開發工具
+
+### Prisma Studio
+
+打開數據庫可視化管理工具：
+
+```bash
+npx prisma studio
+```
+
+### 重新生成 Prisma Client
+
+```bash
+npx prisma generate
+```
+
+### 創建數據庫遷移
+
+```bash
+npx prisma migrate dev --name migration_name
+```
 
 ## 📁 項目結構
 
 ```
 backend/
+├── prisma/
+│   └── schema.prisma      # Prisma 數據庫模型
 ├── src/
-│   ├── config/
-│   │   └── database.js          # MongoDB 連接配置
-│   ├── controllers/
-│   │   ├── authController.js    # 認證控制器
-│   │   ├── userController.js    # 用戶控制器
-│   │   ├── postController.js    # 文章控制器
-│   │   └── commentController.js # 評論控制器
-│   ├── middlewares/
-│   │   ├── auth.js              # JWT 認證中間件
-│   │   └── errorHandler.js      # 錯誤處理中間件
-│   ├── models/
-│   │   ├── User.js              # 用戶模型
-│   │   ├── Post.js              # 文章模型
-│   │   ├── Comment.js           # 評論模型
-│   │   ├── Like.js              # 點讚模型
-│   │   └── Bookmark.js          # 收藏模型
-│   ├── routes/
-│   │   ├── auth.js              # 認證路由
-│   │   ├── users.js             # 用戶路由
-│   │   ├── posts.js             # 文章路由
-│   │   └── comments.js          # 評論路由
-│   └── index.js                 # 應用入口
-├── .env                         # 環境變數配置
-├── package.json
-├── start-dev.bat                # Windows 開發啟動腳本
-└── API_TESTING.md               # API 測試文檔
+│   ├── auth/              # 認證模塊
+│   ├── users/             # 用戶模塊
+│   ├── posts/             # 文章模塊
+│   ├── comments/          # 評論模塊
+│   ├── prisma/            # Prisma 服務
+│   ├── app.module.ts      # 根模塊
+│   └── main.ts            # 應用入口
+├── .env                   # 環境變數
+├── nest-cli.json          # NestJS 配置
+├── package.json           # 依賴管理
+└── tsconfig.json          # TypeScript 配置
 ```
 
----
+## 🚀 部署
 
-## 🔌 API 端點
+### 環境變數
 
-### 認證
-- `POST /api/auth/register` - 註冊
-- `POST /api/auth/login` - 登入
-- `GET /api/auth/me` - 獲取當前用戶 (需認證)
+確保在生產環境設置以下變數：
 
-### 用戶
-- `GET /api/users/:id` - 獲取用戶資料
-- `PUT /api/users/:id` - 更新用戶資料 (需認證)
-- `GET /api/users/:id/posts` - 獲取用戶的文章
-- `POST /api/users/avatar` - 上傳頭像 (需認證)
+- `DATABASE_URL` - PostgreSQL連接字符串
+- `JWT_SECRET` - 安全的JWT密鑰
+- `NODE_ENV=production`
+- `PORT` - 服務器端口
 
-### 文章
-- `GET /api/posts` - 獲取所有文章
-- `GET /api/posts/:id` - 獲取單篇文章
-- `POST /api/posts` - 創建文章 (需認證)
-- `PUT /api/posts/:id` - 更新文章 (需認證)
-- `DELETE /api/posts/:id` - 刪除文章 (需認證)
-- `POST /api/posts/:id/like` - 點讚/取消點讚 (需認證)
-- `POST /api/posts/:id/bookmark` - 收藏/取消收藏 (需認證)
+### 構建
 
-### 評論
-- `GET /api/comments/posts/:postId/comments` - 獲取文章的評論
-- `POST /api/comments/posts/:postId/comments` - 創建評論 (需認證)
-- `DELETE /api/comments/:id` - 刪除評論 (需認證)
-- `POST /api/comments/:id/like` - 點讚/取消點讚評論 (需認證)
-
-詳細 API 文檔請查看 [API_TESTING.md](./API_TESTING.md)
-
----
-
-## 🧪 測試
-
-### 使用 PowerShell 測試
-
-```powershell
-# 註冊
-$body = @{
-    username = "testuser"
-    email = "test@example.com"
-    password = "password123"
-    name = "Test User"
-} | ConvertTo-Json
-
-Invoke-RestMethod -Uri "http://localhost:5000/api/auth/register" `
-    -Method Post -ContentType "application/json" -Body $body
+```bash
+npm run build
+npm run start:prod
 ```
 
----
+## 📄 授權
 
-## 📦 技術棧
+ISC
 
-- **Express.js 5** - Web 框架
-- **MongoDB + Mongoose** - 數據庫
-- **JWT** - 身份驗證
-- **bcryptjs** - 密碼加密
-- **CORS** - 跨域支持
-- **Morgan** - HTTP 請求日誌
+## 👥 作者
 
----
-
-## 🔐 安全
-
-- 密碼使用 bcrypt 加密存儲
-- JWT Token 有效期為 7 天
-- CORS 配置可在 `.env` 中自定義
-- 敏感操作需要 Token 認證
-- 用戶只能修改/刪除自己的內容
-
----
-
-## 🐛 故障排除
-
-### MongoDB 連接失敗
-1. 確保 MongoDB 服務正在運行
-2. 檢查 `.env` 中的 `MONGODB_URI` 是否正確
-3. 如果使用 Atlas，確保 IP 白名單已配置
-
-### Port 已被佔用
-修改 `.env` 中的 `PORT` 為其他端口
-
-### JWT 錯誤
-確保 `.env` 中的 `JWT_SECRET` 已設置且足夠複雜
-
----
-
-## 📝 開發計劃
-
-- [x] 用戶認證系統
-- [x] 文章 CRUD
-- [x] 評論系統
-- [x] 點讚功能
-- [x] 收藏功能
-- [ ] 文件上傳 (AWS S3)
-- [ ] 用戶關注系統
-- [ ] 即時通知
-- [ ] 搜尋功能
-- [ ] 數據分析
+HAPPY SHARE Team

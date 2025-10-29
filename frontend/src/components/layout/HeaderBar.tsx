@@ -17,6 +17,7 @@ export interface HeaderBarProps {
   };
   showThemeToggle?: boolean;
   showProfile?: boolean;
+  showSearch?: boolean;
 }
 
 export function HeaderBar({ 
@@ -24,7 +25,8 @@ export function HeaderBar({
   showBack = true, 
   rightAction,
   showThemeToggle = true,
-  showProfile = true
+  showProfile = true,
+  showSearch = true,
 }: HeaderBarProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { theme } = useAppTheme();
@@ -44,6 +46,15 @@ export function HeaderBar({
     }
   };
 
+  const handleSearchPress = () => {
+    try {
+      navigation.navigate('Search');
+      console.log('HeaderBar: Navigation to Search initiated');
+    } catch (error) {
+      console.error('HeaderBar: Search navigation error:', error);
+    }
+  };
+
   return (
     <Appbar.Header
       style={[
@@ -60,6 +71,12 @@ export function HeaderBar({
         title={title}
         titleStyle={{ color: theme.colors.onSurface }}
       />
+      {showSearch && (
+        <Appbar.Action 
+          icon="magnify" 
+          onPress={handleSearchPress}
+        />
+      )}
       {showThemeToggle && <ThemeToggle />}
       {showProfile && user && (
         <TouchableOpacity onPress={handleProfilePress} style={styles.avatarContainer}>
