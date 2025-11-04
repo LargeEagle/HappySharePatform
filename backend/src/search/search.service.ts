@@ -116,12 +116,21 @@ export class SearchService {
     }
 
     // type === 'all'：返回所有類型的結果（各取前 5 個）
-    const [posts, users, files, tags] = await Promise.all([
-      this.searchEngine.searchPosts({ query, page: 1, limit: 5 }),
-      this.searchEngine.searchUsers({ query, page: 1, limit: 5 }),
-      this.searchEngine.searchFiles({ query, page: 1, limit: 5 }),
-      this.searchEngine.searchTags({ query, page: 1, limit: 5 }),
-    ]);
+    // 改為順序執行避免連接池耗盡
+    console.log('[SearchService] Starting sequential search for all types');
+    
+    const posts = await this.searchEngine.searchPosts({ query, page: 1, limit: 5 });
+    console.log(`[SearchService] Posts found: ${posts.total}`);
+    
+    const users = await this.searchEngine.searchUsers({ query, page: 1, limit: 5 });
+    console.log(`[SearchService] Users found: ${users.total}`);
+    
+    // 文件搜索暫時跳過
+    const files = { items: [], total: 0, page: 1, limit: 5, hasMore: false };
+    console.log('[SearchService] Files search skipped');
+    
+    const tags = await this.searchEngine.searchTags({ query, page: 1, limit: 5 });
+    console.log(`[SearchService] Tags found: ${tags.total}`);
 
     const totalResults =
       posts.total + users.total + files.total + tags.total;

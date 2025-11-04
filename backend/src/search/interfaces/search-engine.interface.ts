@@ -19,7 +19,7 @@ export interface SearchResult {
 
 export interface Suggestion {
   text: string;
-  type: 'tag' | 'user';
+  type: 'tag' | 'user' | 'post';
   avatar?: string;
   count?: number;
 }

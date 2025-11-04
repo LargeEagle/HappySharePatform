@@ -48,9 +48,85 @@ export class PostsService {
       ? { likesCount: 'desc' as const }
       : { createdAt: 'desc' as const };
 
-    const [posts, total] = await Promise.all([
-      this.prisma.post.findMany({
-        where: { isPublished: true },
+    // 使用 executeWithRetry 包裝查詢
+    return await this.prisma.executeWithRetry(async () => {
+      const [posts, total] = await Promise.all([
+        this.prisma.post.findMany({
+          where: { isPublished: true },
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                avatar: true,
+              },
+            },
+          },
+          orderBy,
+          skip,
+          take: limit,
+        }),
+        this.prisma.post.count({ where: { isPublished: true } }),
+      ]);
+
+      // 如果用戶已登入，批量獲取點讚和收藏狀態（避免 N+1 查詢）
+      let postsWithInteractions = posts.map(post => ({
+        ...post,
+        isLiked: false,
+        isBookmarked: false,
+      }));
+
+      if (currentUserId && posts.length > 0) {
+        const postIds = posts.map(p => p.id);
+        
+        // 批量查詢，只用 2 個查詢而不是 N*2 個
+        const [likes, bookmarks] = await Promise.all([
+          this.prisma.like.findMany({
+            where: {
+              userId: currentUserId,
+              postId: { in: postIds },
+            },
+            select: { postId: true },
+          }),
+          this.prisma.bookmark.findMany({
+            where: {
+              userId: currentUserId,
+              postId: { in: postIds },
+            },
+            select: { postId: true },
+          }),
+        ]);
+
+        const likedPostIds = new Set(likes.map(l => l.postId));
+        const bookmarkedPostIds = new Set(bookmarks.map(b => b.postId));
+
+        postsWithInteractions = posts.map(post => ({
+          ...post,
+          isLiked: likedPostIds.has(post.id),
+          isBookmarked: bookmarkedPostIds.has(post.id),
+        }));
+      }
+
+      return {
+        success: true,
+        message: 'Posts retrieved successfully',
+        data: {
+          posts: postsWithInteractions,
+          pagination: {
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            hasMore: page < Math.ceil(total / limit),
+            total,
+          },
+        },
+      };
+    });
+  }
+
+  async getPost(id: string, currentUserId?: string) {
+    return await this.prisma.executeWithRetry(async () => {
+      const post = await this.prisma.post.findUnique({
+        where: { id },
         include: {
           author: {
             select: {
@@ -60,121 +136,50 @@ export class PostsService {
             },
           },
         },
-        orderBy,
-        skip,
-        take: limit,
-      }),
-      this.prisma.post.count({ where: { isPublished: true } }),
-    ]);
+      });
 
-    // 如果用戶已登入，獲取點讚和收藏狀態
-    const postsWithInteractions = await Promise.all(
-      posts.map(async (post) => {
-        if (currentUserId) {
-          const [isLiked, isBookmarked] = await Promise.all([
-            this.prisma.like.findUnique({
-              where: {
-                userId_postId: {
-                  userId: currentUserId,
-                  postId: post.id,
-                },
+      if (!post) {
+        throw new NotFoundException('Post not found');
+      }
+
+      // 檢查點讚和收藏狀態
+      let isLiked = false;
+      let isBookmarked = false;
+
+      if (currentUserId) {
+        const [like, bookmark] = await Promise.all([
+          this.prisma.like.findUnique({
+            where: {
+              userId_postId: {
+                userId: currentUserId,
+                postId: id,
               },
-            }),
-            this.prisma.bookmark.findUnique({
-              where: {
-                userId_postId: {
-                  userId: currentUserId,
-                  postId: post.id,
-                },
+            },
+          }),
+          this.prisma.bookmark.findUnique({
+            where: {
+              userId_postId: {
+                userId: currentUserId,
+                postId: id,
               },
-            }),
-          ]);
+            },
+          }),
+        ]);
 
-          return {
-            ...post,
-            isLiked: !!isLiked,
-            isBookmarked: !!isBookmarked,
-          };
-        }
+        isLiked = !!like;
+        isBookmarked = !!bookmark;
+      }
 
-        return {
+      return {
+        success: true,
+        message: 'Post retrieved successfully',
+        data: {
           ...post,
-          isLiked: false,
-          isBookmarked: false,
-        };
-      }),
-    );
-
-    return {
-      success: true,
-      message: 'Posts retrieved successfully',
-      data: {
-        posts: postsWithInteractions,
-        pagination: {
-          currentPage: page,
-          totalPages: Math.ceil(total / limit),
-          hasMore: page < Math.ceil(total / limit),
-          total,
+          isLiked,
+          isBookmarked,
         },
-      },
-    };
-  }
-
-  async getPost(id: string, currentUserId?: string) {
-    const post = await this.prisma.post.findUnique({
-      where: { id },
-      include: {
-        author: {
-          select: {
-            id: true,
-            username: true,
-            avatar: true,
-          },
-        },
-      },
+      };
     });
-
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
-
-    // 檢查點讚和收藏狀態
-    let isLiked = false;
-    let isBookmarked = false;
-
-    if (currentUserId) {
-      const [like, bookmark] = await Promise.all([
-        this.prisma.like.findUnique({
-          where: {
-            userId_postId: {
-              userId: currentUserId,
-              postId: id,
-            },
-          },
-        }),
-        this.prisma.bookmark.findUnique({
-          where: {
-            userId_postId: {
-              userId: currentUserId,
-              postId: id,
-            },
-          },
-        }),
-      ]);
-
-      isLiked = !!like;
-      isBookmarked = !!bookmark;
-    }
-
-    return {
-      success: true,
-      message: 'Post retrieved successfully',
-      data: {
-        ...post,
-        isLiked,
-        isBookmarked,
-      },
-    };
   }
 
   async updatePost(id: string, currentUserId: string, updatePostDto: UpdatePostDto) {
