@@ -1,3 +1,4 @@
+// Updated: 2025-11-01 03:20 - Fixed dual file issue and navigation architecture
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -12,6 +13,14 @@ import { EditPostScreen } from "./src/screens/EditPostScreen";
 import PostDetailScreen from "./src/screens/PostDetailScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 import EditProfileScreen from "./src/screens/EditProfileScreen";
+import { SearchScreen } from "./src/screens/SearchScreen";
+import { SearchScreenTest } from "./src/screens/SearchScreenTest"; // 👈 測試版本
+import { SearchScreenMinimal } from "./src/screens/SearchScreenMinimal"; // 👈 最小化版本  
+import { TagPostsScreen } from "./src/screens/TagPostsScreen";
+import MapSearchScreen from "./src/screens/MapSearchScreen";
+import { FollowListScreen } from "./src/screens/FollowListScreen";
+import { NotificationsScreen } from "./src/screens/NotificationsScreen";
+import { NotificationSettingsScreen } from "./src/screens/NotificationSettingsScreen";
 import { RootStackParamList } from "./src/types/navigation";
 import { HeaderBar } from "./src/components/layout";
 
@@ -27,7 +36,7 @@ function Navigation() {
     return null;
   }
 
-  console.log('Navigation: Rendering', isAuthenticated ? 'authenticated' : 'unauthenticated', 'screens');
+  console.log('Navigation: Rendering screens, initialRoute:', isAuthenticated ? 'Home' : 'Login');
 
   return (
     <NavigationContainer
@@ -39,40 +48,38 @@ function Navigation() {
       }}
     >
       <Stack.Navigator
+        initialRouteName={isAuthenticated ? "Home" : "Login"}
         screenOptions={{
           animation: 'fade',
         }}
-        initialRouteName={isAuthenticated ? 'Home' : 'Login'}
       >
-        {/* 未認證路由 */}
+        {/* 認證頁面 - 始終註冊 */}
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={{ 
-            headerShown: false,
-            ...(isAuthenticated && { presentation: 'modal' as const })
-          }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="Register"
           component={RegisterScreen}
-          options={{ 
-            headerShown: false,
-            ...(isAuthenticated && { presentation: 'modal' as const })
-          }}
+          options={{ headerShown: false }}
         />
         
-        {/* 已認證路由 */}
+        {/* 功能頁面 - 始終註冊，但通過 HeaderBar 控制訪問 */}
         <Stack.Screen
           name="Home"
           component={HomeScreen}
           options={{
             title: "首頁",
             header: (props) => <HeaderBar {...props} title="首頁" showBack={false} />,
-            ...((!isAuthenticated) && { 
-              headerShown: false,
-              animationEnabled: false 
-            })
+          }}
+        />
+        <Stack.Screen
+          name="Search"
+          component={SearchScreen}
+          options={{
+            title: "搜尋",
+            header: (props) => <HeaderBar {...props} title="搜尋" />,
           }}
         />
         <Stack.Screen
@@ -81,10 +88,6 @@ function Navigation() {
           options={{
             title: "個人資料",
             header: (props) => <HeaderBar {...props} title="個人資料" showProfile={false} />,
-            ...((!isAuthenticated) && { 
-              headerShown: false,
-              animationEnabled: false 
-            })
           }}
         />
         <Stack.Screen
@@ -93,10 +96,6 @@ function Navigation() {
           options={{
             title: "編輯資料",
             header: (props) => <HeaderBar {...props} title="編輯資料" showProfile={false} />,
-            ...((!isAuthenticated) && { 
-              headerShown: false,
-              animationEnabled: false 
-            })
           }}
         />
         <Stack.Screen
@@ -105,10 +104,6 @@ function Navigation() {
           options={{
             title: "發布文章",
             header: (props) => <HeaderBar {...props} title="發布文章" />,
-            ...((!isAuthenticated) && { 
-              headerShown: false,
-              animationEnabled: false 
-            })
           }}
         />
         <Stack.Screen
@@ -117,10 +112,6 @@ function Navigation() {
           options={{
             title: "編輯文章",
             header: (props) => <HeaderBar {...props} title="編輯文章" />,
-            ...((!isAuthenticated) && { 
-              headerShown: false,
-              animationEnabled: false 
-            })
           }}
         />
         <Stack.Screen
@@ -129,10 +120,42 @@ function Navigation() {
           options={{
             title: "文章詳情",
             header: (props) => <HeaderBar {...props} title="文章詳情" />,
-            ...((!isAuthenticated) && { 
-              headerShown: false,
-              animationEnabled: false 
-            })
+          }}
+        />
+        <Stack.Screen
+          name="TagPosts"
+          component={TagPostsScreen}
+          options={{
+            title: "標籤",
+            header: (props) => <HeaderBar {...props} title="標籤" />,
+          }}
+        />
+        <Stack.Screen
+          name="MapSearch"
+          component={MapSearchScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="FollowList"
+          component={FollowListScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Notifications"
+          component={NotificationsScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="NotificationSettings"
+          component={NotificationSettingsScreen}
+          options={{
+            headerShown: false,
           }}
         />
       </Stack.Navigator>

@@ -7,14 +7,17 @@ import { Comment } from '../../services/postInteraction.service';
 interface CommentItemProps {
   comment: Comment;
   onLike: (commentId: string) => void;
+  onReply: (commentId: string, username: string) => void; // 新增回覆回調
+  depth?: number; // 新增：嵌套深度
 }
 
-export const CommentItem = memo<CommentItemProps>(({ comment, onLike }) => {
+export const CommentItem = memo<CommentItemProps>(({ comment, onLike, onReply, depth = 0 }) => {
   const { theme } = useAppTheme();
   const formattedDate = new Date(comment.createdAt).toLocaleDateString();
+  const maxDepth = 3; // 最大嵌套深度
 
   return (
-    <View style={[styles.container, { borderBottomColor: theme.colors.surfaceVariant }]}>
+    <View style={[styles.container, depth > 0 && { marginLeft: 20 * depth }, { borderBottomColor: theme.colors.surfaceVariant }]}>
       <View style={styles.header}>
         {comment.author.avatar ? (
           <Avatar.Image size={32} source={{ uri: comment.author.avatar }} />
@@ -29,6 +32,11 @@ export const CommentItem = memo<CommentItemProps>(({ comment, onLike }) => {
         <View style={styles.authorInfo}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
             {comment.author.username}
+            {comment.replyTo && (
+              <Text variant="bodySmall" style={{ color: theme.colors.primary }}>
+                {' '}回覆 @{comment.replyTo.username}
+              </Text>
+            )}
           </Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             {formattedDate}
@@ -57,7 +65,38 @@ export const CommentItem = memo<CommentItemProps>(({ comment, onLike }) => {
             {comment.likes}
           </Text>
         </Pressable>
+
+        {depth < maxDepth && (
+          <Pressable
+            style={styles.replyButton}
+            onPress={() => onReply(comment.id, comment.author.username)}
+          >
+            <IconButton
+              icon="reply"
+              size={16}
+              iconColor={theme.colors.onSurfaceVariant}
+            />
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              回覆
+            </Text>
+          </Pressable>
+        )}
       </View>
+
+      {/* 顯示回覆列表 */}
+      {comment.replies && comment.replies.length > 0 && (
+        <View style={styles.repliesContainer}>
+          {comment.replies.map((reply) => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              onLike={onLike}
+              onReply={onReply}
+              depth={depth + 1}
+            />
+          ))}
+        </View>
+      )}
     </View>
   );
 });
@@ -87,5 +126,13 @@ const styles = StyleSheet.create({
   likeButton: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  replyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  repliesContainer: {
+    marginTop: 8,
   },
 });

@@ -49,7 +49,7 @@ export interface Attachment {
 // 搜尋建議
 export interface SearchSuggestion {
   text: string;
-  type: 'tag' | 'user';
+  type: 'tag' | 'user' | 'post';
   avatar?: string;
   count?: number;
 }

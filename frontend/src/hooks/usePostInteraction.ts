@@ -62,10 +62,16 @@ export function usePostInteraction({ postId }: UsePostInteractionProps): UsePost
   }, [loadComments]);
 
   // 發表評論
-  const createComment = useCallback(async (content: string) => {
+  const createComment = useCallback(async (content: string, parentId?: string, replyToUsername?: string) => {
     try {
       setError(null);
-      await postInteractionService.createComment({ postId, content });
+      await postInteractionService.createComment({ 
+        postId, 
+        content,
+        parentId,
+        replyToUserId: parentId, // 使用 parentId 作為 replyToUserId
+        replyToUsername
+      });
       await refreshComments();
     } catch (err) {
       setError(err instanceof Error ? err.message : '發表評論失敗');

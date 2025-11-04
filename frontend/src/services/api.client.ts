@@ -5,18 +5,34 @@ import { authStorage } from '../utils/storage';
 /**
  * API 客戶端配置
  * 統一管理所有 HTTP 請求
+ * 
+ * 修復: 2025-11-02 - 使用延遲初始化避免模塊加載時的問題
  */
 class ApiClient {
-  private client: AxiosInstance;
+  private client: AxiosInstance | null = null;
 
-  constructor() {
-    this.client = axios.create({
-      baseURL: appConfig.api.baseUrl,
-      timeout: appConfig.api.timeout,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+  /**
+   * 獲取或創建 axios 實例（延遲初始化）
+   */
+  private getClient(): AxiosInstance {
+    if (!this.client) {
+      this.client = axios.create({
+        baseURL: appConfig.api.baseUrl,
+        timeout: appConfig.api.timeout,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      this.setupInterceptors();
+    }
+    return this.client;
+  }
+
+  /**
+   * 設置請求和響應攔截器
+   */
+  private setupInterceptors(): void {
+    if (!this.client) return;
 
     // 請求攔截器：自動添加認證 token
     this.client.interceptors.request.use(
@@ -50,7 +66,7 @@ class ApiClient {
    * GET 請求
    */
   async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.client.get(url, config);
+    const response: AxiosResponse<T> = await this.getClient().get(url, config);
     return response.data;
   }
 
@@ -58,7 +74,7 @@ class ApiClient {
    * POST 請求
    */
   async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.client.post(url, data, config);
+    const response: AxiosResponse<T> = await this.getClient().post(url, data, config);
     return response.data;
   }
 
@@ -66,7 +82,7 @@ class ApiClient {
    * PUT 請求
    */
   async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.client.put(url, data, config);
+    const response: AxiosResponse<T> = await this.getClient().put(url, data, config);
     return response.data;
   }
 
@@ -74,7 +90,7 @@ class ApiClient {
    * DELETE 請求
    */
   async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.client.delete(url, config);
+    const response: AxiosResponse<T> = await this.getClient().delete(url, config);
     return response.data;
   }
 
@@ -82,7 +98,7 @@ class ApiClient {
    * PATCH 請求
    */
   async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-    const response: AxiosResponse<T> = await this.client.patch(url, data, config);
+    const response: AxiosResponse<T> = await this.getClient().patch(url, data, config);
     return response.data;
   }
 }

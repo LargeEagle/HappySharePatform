@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, StyleSheet, FlatList, RefreshControl, ScrollView } from 'react-native';
+import { View, StyleSheet, FlatList, RefreshControl, ScrollView, TouchableOpacity } from 'react-native';
 import { Text, Avatar, Button, Divider, IconButton, ActivityIndicator } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaLayout } from '../components/layout';
 import { PostCard } from '../components/common/PostCard';
+import { FollowButton } from '../components/common';
 import { useAppTheme } from '../providers/ThemeProvider';
 import { useAuth } from '../hooks/useAuth';
 import { getUserProfile, getUserPosts } from '../services/user.service';
@@ -214,18 +215,24 @@ export function ProfileScreen({ navigation, route }: Props) {
                   文章
                 </Text>
               </View>
-              <View style={styles.statItem}>
+              <TouchableOpacity
+                style={styles.statItem}
+                onPress={() => userId && navigation.navigate('FollowList', { userId, initialTab: 'followers' })}
+              >
                 <Text variant="titleMedium">{user?.stats?.followersCount || 0}</Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.secondary }}>
                   粉絲
                 </Text>
-              </View>
-              <View style={styles.statItem}>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.statItem}
+                onPress={() => userId && navigation.navigate('FollowList', { userId, initialTab: 'following' })}
+              >
                 <Text variant="titleMedium">{user?.stats?.followingCount || 0}</Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.secondary }}>
                   關注
                 </Text>
-              </View>
+              </TouchableOpacity>
               <View style={styles.statItem}>
                 <Text variant="titleMedium">{user?.stats?.likesCount || 0}</Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.secondary }}>
@@ -235,7 +242,7 @@ export function ProfileScreen({ navigation, route }: Props) {
             </View>
 
             {/* 操作按鈕 */}
-            {isOwnProfile && (
+            {isOwnProfile ? (
               <View style={styles.actionsContainer}>
                 <Button
                   mode="contained"
@@ -253,6 +260,16 @@ export function ProfileScreen({ navigation, route }: Props) {
                 >
                   登出
                 </Button>
+              </View>
+            ) : (
+              <View style={styles.actionsContainer}>
+                {userId && (
+                  <FollowButton
+                    userId={userId}
+                    initialFollowState={false}
+                    variant="contained"
+                  />
+                )}
               </View>
             )}
 

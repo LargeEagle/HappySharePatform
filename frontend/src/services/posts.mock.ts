@@ -1,5 +1,9 @@
 import { Post, PostsQueryParams, PostsResponse, CreatePostParams } from '../types/post';
 import { dummyPosts, delay } from '../utils/dummyData';
+import { 
+  filterPostsByRadius, 
+  sortPostsByDistance 
+} from '../utils/location';
 
 /**
  * 文章服務 - Mock 實現
@@ -79,11 +83,36 @@ export const postsMockService = {
 
     const page = params?.page || 1;
     const limit = params?.limit || 10;
+    const sort = params?.sort || 'latest';
+    const location = params?.location;
+
+    let filteredPosts = [...mockPosts];
+
+    // 位置篩選
+    if (location) {
+      const radiusKm = location.radiusKm || 10; // 預設 10km
+      filteredPosts = filterPostsByRadius(
+        filteredPosts,
+        { latitude: location.latitude, longitude: location.longitude },
+        radiusKm
+      );
+    }
+
+    // 排序
+    if (sort === 'nearest' && location) {
+      filteredPosts = sortPostsByDistance(
+        filteredPosts,
+        { latitude: location.latitude, longitude: location.longitude }
+      );
+    } else if (sort === 'popular') {
+      filteredPosts.sort((a, b) => b.likes - a.likes);
+    }
+    // 'latest' 已經是預設順序（新的在前）
+
     const start = (page - 1) * limit;
     const end = start + limit;
-
-    const posts = mockPosts.slice(start, end);
-    const totalPages = Math.ceil(mockPosts.length / limit);
+    const posts = filteredPosts.slice(start, end);
+    const totalPages = Math.ceil(filteredPosts.length / limit);
 
     return {
       posts,

@@ -1,15 +1,18 @@
 import React, { memo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Card, Text, Avatar, Chip } from 'react-native-paper';
+import { Card, Text, Avatar, Chip, Icon } from 'react-native-paper';
 import { Post } from '../../types/post';
 import { useAppTheme } from '../../providers/ThemeProvider';
+import { ImageCarousel } from './ImageCarousel';
 
 interface PostCardProps {
   post: Post;
   onPress?: () => void;
+  distance?: number; // 距離（公里）
+  distanceFormatted?: string; // 格式化的距離
 }
 
-export const PostCard = memo<PostCardProps>(({ post, onPress }) => {
+export const PostCard = memo<PostCardProps>(({ post, onPress, distance, distanceFormatted }) => {
   const { theme } = useAppTheme();
   const formattedDate = new Date(post.createdAt).toLocaleDateString();
 
@@ -49,6 +52,14 @@ export const PostCard = memo<PostCardProps>(({ post, onPress }) => {
               </Text>
             </View>
           </View>
+          {distanceFormatted && (
+            <View style={styles.distanceContainer}>
+              <Icon source="map-marker" size={16} color={theme.colors.primary} />
+              <Text variant="bodySmall" style={{ color: theme.colors.primary, marginLeft: 4 }}>
+                {distanceFormatted}
+              </Text>
+            </View>
+          )}
         </View>
 
         <Text 
@@ -71,6 +82,17 @@ export const PostCard = memo<PostCardProps>(({ post, onPress }) => {
         >
           {post.content}
         </Text>
+
+        {/* 圖片輪播 */}
+        {post.images && post.images.length > 0 && (
+          <View style={styles.imagesContainer}>
+            <ImageCarousel
+              images={post.images}
+              height={200}
+              showIndicator={true}
+            />
+          </View>
+        )}
 
         {post.tags && post.tags.length > 0 && (
           <View style={styles.tags}>
@@ -127,6 +149,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  distanceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   authorText: {
     marginLeft: 12,
   },
@@ -135,6 +161,10 @@ const styles = StyleSheet.create({
   },
   content: {
     marginBottom: 12,
+  },
+  imagesContainer: {
+    marginBottom: 12,
+    marginHorizontal: -16, // 讓圖片延伸到卡片邊緣
   },
   tags: {
     flexDirection: 'row',

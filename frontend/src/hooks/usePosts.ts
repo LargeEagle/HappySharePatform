@@ -53,7 +53,7 @@ export function usePosts(initialParams: PostsQueryParams) {
   }, [isLoading, hasMore, posts.length, params.limit, loadPosts]);
 
   // 更改排序方式
-  const changeSort = useCallback((sort: 'latest' | 'popular') => {
+  const changeSort = useCallback((sort: 'latest' | 'popular' | 'nearest') => {
     setParams(prev => ({ ...prev, sort }));
   }, []);
 

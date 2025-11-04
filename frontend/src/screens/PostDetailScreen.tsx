@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 import { ActivityIndicator, Text, Avatar, Chip, IconButton, Surface, Portal, Modal, Menu, Button } from 'react-native-paper';
 import { SafeAreaLayout } from '../components/layout';
-import { TagsList } from '../components/common';
+import { TagsList, MapPreview, ImageCarousel, ImageViewer } from '../components/common';
 import { useAppTheme } from '../providers/ThemeProvider';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
@@ -36,6 +36,8 @@ function PostDetailScreen({ route, navigation }: Props) {
   
   const [menuVisible, setMenuVisible] = useState(false);
   const [isCommentsVisible, setCommentsVisible] = useState(false);
+  const [showImageViewer, setShowImageViewer] = useState(false);
+  const [imageViewerIndex, setImageViewerIndex] = useState(0);
 
   const handleEdit = () => {
     setMenuVisible(false);
@@ -210,9 +212,28 @@ function PostDetailScreen({ route, navigation }: Props) {
           {post.content}
         </Text>
 
+        {/* 圖片輪播 */}
         {post.images && post.images.length > 0 && (
           <View style={styles.imagesContainer}>
-            {/* TODO: 實現圖片展示 */}
+            <ImageCarousel
+              images={post.images}
+              height={300}
+              showIndicator={true}
+              onImagePress={(index) => {
+                setImageViewerIndex(index);
+                setShowImageViewer(true);
+              }}
+            />
+          </View>
+        )}
+
+        {/* 位置信息顯示 */}
+        {post.location && (
+          <View style={styles.locationSection}>
+            <MapPreview
+              location={post.location}
+              height={200}
+            />
           </View>
         )}
 
@@ -258,6 +279,16 @@ function PostDetailScreen({ route, navigation }: Props) {
             onLikeComment={toggleCommentLike}
           />
         </Modal>
+
+        {/* 圖片查看器 */}
+        {post && post.images && post.images.length > 0 && (
+          <ImageViewer
+            images={post.images}
+            initialIndex={imageViewerIndex}
+            visible={showImageViewer}
+            onClose={() => setShowImageViewer(false)}
+          />
+        )}
       </Portal>
     </SafeAreaLayout>
   );
@@ -311,9 +342,14 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 16,
     lineHeight: 24,
+    marginBottom: 16,
   },
   imagesContainer: {
-    padding: 16,
+    marginBottom: 16,
+  },
+  locationSection: {
+    marginTop: 16,
+    paddingHorizontal: 16,
   },
   footer: {
     padding: 16,

@@ -11,6 +11,9 @@ export interface PostInteractionResponse {
 export interface CreateCommentParams {
   postId: string;
   content: string;
+  parentId?: string; // 新增：父評論 ID
+  replyToUserId?: string; // 新增：回覆的用戶 ID
+  replyToUsername?: string; // 新增：回覆的用戶名
 }
 
 export interface Comment {
@@ -24,6 +27,12 @@ export interface Comment {
   createdAt: string;
   likes: number;
   isLiked?: boolean;
+  parentId?: string; // 新增：父評論 ID，用於嵌套回覆
+  replies?: Comment[]; // 新增：子評論列表
+  replyTo?: { // 新增：回覆對象信息
+    id: string;
+    username: string;
+  };
 }
 
 // 模擬評論數據
@@ -86,14 +95,32 @@ export const postInteractionService = {
       },
       createdAt: new Date().toISOString(),
       likes: 0,
-      isLiked: false
+      isLiked: false,
+      parentId: params.parentId,
+      replies: [],
+      replyTo: params.replyToUserId && params.replyToUsername ? {
+        id: params.replyToUserId,
+        username: params.replyToUsername
+      } : undefined
     };
 
     if (!mockComments[params.postId]) {
       mockComments[params.postId] = [];
     }
     
-    mockComments[params.postId].unshift(newComment);
+    // 如果是回覆，添加到父評論的 replies 中
+    if (params.parentId) {
+      const parentComment = mockComments[params.postId].find(c => c.id === params.parentId);
+      if (parentComment) {
+        if (!parentComment.replies) {
+          parentComment.replies = [];
+        }
+        parentComment.replies.push(newComment);
+      }
+    } else {
+      // 頂層評論
+      mockComments[params.postId].unshift(newComment);
+    }
 
     return {
       success: true,
