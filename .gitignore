@@ -75,3 +75,18 @@ Thumbs.db
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+
+# Archive and backup files
+.archive/
+*.backup
+*.bak
+
+# Test and temporary HTML files
+test-*.html
+*-test.html
+verify-*.js
+
+# Development logs
+dev.log
+server.log
+frontend.log

@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試報告 - HAPPY SHARE API</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: #f44336; color: white; padding: 30px; border-radius: 8px 8px 0 0; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .header .date { opacity: 0.9; font-size: 14px; }
+        .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 30px; background: #f9f9f9; }
+        .summary-item { text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .summary-item .value { font-size: 32px; font-weight: bold; color: #333; margin: 10px 0; }
+        .summary-item .label { color: #666; font-size: 14px; text-transform: uppercase; }
+        .suite { padding: 30px; border-bottom: 1px solid #e0e0e0; }
+        .suite:last-child { border-bottom: none; }
+        .suite-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .suite-title { font-size: 20px; font-weight: bold; color: #333; }
+        .suite-stats { display: flex; gap: 15px; font-size: 14px; }
+        .suite-stats span { padding: 4px 8px; border-radius: 4px; }
+        .passed { background: #e8f5e9; color: #2e7d32; }
+        .failed { background: #ffebee; color: #c62828; }
+        .skipped { background: #fff3e0; color: #f57c00; }
+        .test-list { list-style: none; }
+        .test-item { padding: 12px; margin-bottom: 8px; border-radius: 4px; background: #f9f9f9; display: flex; justify-content: space-between; align-items: center; }
+        .test-item.passed { border-left: 4px solid #4caf50; }
+        .test-item.failed { border-left: 4px solid #f44336; }
+        .test-item.skipped { border-left: 4px solid #ff9800; }
+        .test-name { font-weight: 500; }
+        .test-duration { color: #999; font-size: 12px; }
+        .test-error { color: #c62828; font-size: 13px; margin-top: 8px; padding: 8px; background: #ffebee; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 測試報告: HAPPY SHARE API</h1>
+            <div class="date">測試時間: 10/29/2025, 2:08:23 AM</div>
+        </div>
+        
+        <div class="summary">
+            <div class="summary-item">
+                <div class="label">總測試數</div>
+                <div class="value">18</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">✅ 通過</div>
+                <div class="value" style="color: #4caf50;">7</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">❌ 失敗</div>
+                <div class="value" style="color: #f44336;">11</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">⏭️ 跳過</div>
+                <div class="value" style="color: #ff9800;">0</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">成功率</div>
+                <div class="value" style="color: #f44336;">38.9%</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">總耗時</div>
+                <div class="value" style="color: #666;">1628ms</div>
+            </div>
+        </div>
+
+        
+            <div class="suite">
+                <div class="suite-header">
+                    <h2 class="suite-title">❌ 認證測試</h2>
+                    <div class="suite-stats">
+                        <span class="passed">通過: 3</span>
+                        <span class="failed">失敗: 1</span>
+                        <span class="skipped">跳過: 0</span>
+                    </div>
+                </div>
+                <ul class="test-list">
+                    
+                        <li class="test-item passed">
+                            <div>
+                                <div class="test-name">✅ 健康檢查</div>
+                                
+                            </div>
+                            <div class="test-duration">17ms</div>
+                        </li>
+                        
+                        <li class="test-item passed">
+                            <div>
+                                <div class="test-name">✅ 用戶登入</div>
+                                
+                            </div>
+                            <div class="test-duration">141ms</div>
+                        </li>
+                        
+                        <li class="test-item failed">
+                            <div>
+                                <div class="test-name">❌ 獲取當前用戶信息</div>
+                                <div class="test-error">❌ 字段 "data.user.id" 預期值為 "{{userId}}"，實際得到 undefined</div>
+                            </div>
+                            <div class="test-duration">140ms</div>
+                        </li>
+                        
+                        <li class="test-item passed">
+                            <div>
+                                <div class="test-name">✅ 未授權訪問（無 token）</div>
+                                
+                            </div>
+                            <div class="test-duration">1ms</div>
+                        </li>
+                        
+                </ul>
+            </div>
+            
+            <div class="suite">
+                <div class="suite-header">
+                    <h2 class="suite-title">❌ 文章測試</h2>
+                    <div class="suite-stats">
+                        <span class="passed">通過: 2</span>
+                        <span class="failed">失敗: 5</span>
+                        <span class="skipped">跳過: 0</span>
+                    </div>
+                </div>
+                <ul class="test-list">
+                    
+                        <li class="test-item passed">
+                            <div>
+                                <div class="test-name">✅ 獲取文章列表</div>
+                                
+                            </div>
+                            <div class="test-duration">251ms</div>
+                        </li>
+                        
+                        <li class="test-item passed">
+                            <div>
+                                <div class="test-name">✅ 獲取單篇文章</div>
+                                
+                            </div>
+                            <div class="test-duration">92ms</div>
+                        </li>
+                        
+                        <li class="test-item failed">
+                            <div>
+                                <div class="test-name">❌ 創建文章</div>
+                                <div class="test-error">❌ 預期狀態碼 201，實際得到 400</div>
+                            </div>
+                            <div class="test-duration">94ms</div>
+                        </li>
+                        
+                        <li class="test-item failed">
+                            <div>
+                                <div class="test-name">❌ 更新文章</div>
+                                <div class="test-error">❌ 預期狀態碼 200，實際得到 400</div>
+                            </div>
+                            <div class="test-duration">47ms</div>
+                        </li>
+                        
+                        <li class="test-item failed">
+                            <div>
+                                <div class="test-name">❌ 點讚文章</div>
+                                <div class="test-error">❌ 預期狀態碼 200，實際得到 404</div>
+                            </div>
+                            <div class="test-duration">93ms</div>
+                        </li>
+                        
+                        <li class="test-item failed">
+                            <div>
+                                <div class="test-name">❌ 收藏文章</div>
+                                <div class="test-error">❌ 預期狀態碼 200，實際得到 404</div>
+                            </div>
+                            <div class="test-duration">94ms</div>
+                        </li>
+                        
+                        <li class="test-item failed">
+                            <div>
+                                <div class="test-name">❌ 刪除文章</div>
+                                <div class="test-error">❌ 預期狀態碼 200，實際得到 404</div>
+                            </div>
+                            <div class="test-duration">93ms</div>
+                        </li>
+                        
+                </ul>
+            </div>
+            
+            <div class="suite">
+                <div class="suite-header">
+                    <h2 class="suite-title">❌ 評論測試</h2>
+                    <div class="suite-stats">
+                        <span class="passed">通過: 1</span>
+                        <span class="failed">失敗: 3</span>
+                        <span class="skipped">跳過: 0</span>
+                    </div>
+                </div>
+                <ul class="test-list">
+                    
+                        <li class="test-item passed">
+                            <div>
+                                <div class="test-name">✅ 獲取文章評論</div>
+                                
+                            </div>
+                            <div class="test-duration">95ms</div>
+                        </li>
+                        
+                        <li class="test-item failed">
+                            <div>
+                                <div class="test-name">❌ 創建評論</div>
+                                <div class="test-error">❌ 預期狀態碼 201，實際得到 400</div>
+                            </div>
+                            <div class="test-duration">47ms</div>
+                        </li>
+                        
+                        <li class="test-item failed">
+                            <div>
+                                <div class="test-name">❌ 為評論點讚</div>
+                                <div class="test-error">❌ 預期狀態碼 200，實際得到 404</div>
+                            </div>
+                            <div class="test-duration">137ms</div>
+                        </li>
+                        
+                        <li class="test-item failed">
+                            <div>
+                                <div class="test-name">❌ 刪除評論</div>
+                                <div class="test-error">❌ 預期狀態碼 200，實際得到 404</div>
+                            </div>
+                            <div class="test-duration">96ms</div>
+                        </li>
+                        
+                </ul>
+            </div>
+            
+            <div class="suite">
+                <div class="suite-header">
+                    <h2 class="suite-title">❌ 用戶測試</h2>
+                    <div class="suite-stats">
+                        <span class="passed">通過: 1</span>
+                        <span class="failed">失敗: 2</span>
+                        <span class="skipped">跳過: 0</span>
+                    </div>
+                </div>
+                <ul class="test-list">
+                    
+                        <li class="test-item failed">
+                            <div>
+                                <div class="test-name">❌ 獲取用戶信息</div>
+                                <div class="test-error">❌ 字段 "data.user.id" 預期值為 "{{userId}}"，實際得到 undefined</div>
+                            </div>
+                            <div class="test-duration">48ms</div>
+                        </li>
+                        
+                        <li class="test-item passed">
+                            <div>
+                                <div class="test-name">✅ 獲取用戶文章</div>
+                                
+                            </div>
+                            <div class="test-duration">93ms</div>
+                        </li>
+                        
+                        <li class="test-item failed">
+                            <div>
+                                <div class="test-name">❌ 更新用戶信息</div>
+                                <div class="test-error">❌ 預期狀態碼 200，實際得到 400</div>
+                            </div>
+                            <div class="test-duration">48ms</div>
+                        </li>
+                        
+                </ul>
+            </div>
+            
+    </div>
+</body>
+</html>
+    
