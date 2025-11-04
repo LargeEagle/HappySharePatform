@@ -1,3 +1,7 @@
+import { config } from 'dotenv';
+// 在應用啟動前加載環境變量
+config({ path: '.env' });
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
